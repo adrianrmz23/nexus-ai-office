@@ -1,32 +1,13 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import {
-  Blocks,
-  Bot,
-  BrainCircuit,
-  ChartNoAxesCombined,
-  ChevronDown,
-  FolderKanban,
-  LayoutDashboard,
-  LogOut,
-  MessageSquareText,
-  Settings2,
-  Wrench,
-} from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 
 import { signOut } from "@/app/app/actions";
+import {
+  DesktopAppNavigation,
+  MobileAppNavigation,
+} from "@/components/app-shell/app-navigation";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { Button } from "@/components/ui/button";
-
-const futureNavigation = [
-  { label: "Proyectos", icon: FolderKanban },
-  { label: "Agentes", icon: Bot },
-  { label: "Conversaciones", icon: MessageSquareText },
-  { label: "Tecnologías", icon: Blocks },
-  { label: "Memoria", icon: BrainCircuit },
-  { label: "Analítica", icon: ChartNoAxesCombined },
-  { label: "Configuración", icon: Settings2 },
-];
 
 type AppShellProps = {
   children: ReactNode;
@@ -59,36 +40,14 @@ export function AppShell({
                 Oficina activa
               </div>
             </div>
-            <ChevronDown className="size-3.5 text-slate-600" />
+            <ChevronDown className="size-3.5 text-slate-700" />
           </div>
         </div>
 
-        <nav className="nexus-scrollbar flex-1 overflow-y-auto px-3 py-3">
-          <Link
-            href="/app"
-            className="nexus-focus flex h-10 items-center gap-3 rounded-lg border border-primary/10 bg-primary/[0.065] px-3 text-sm font-medium text-primary"
-          >
-            <LayoutDashboard className="size-4" />
-            Panel general
-          </Link>
-
-          <div className="mt-7 px-3 font-mono text-[0.58rem] tracking-[0.16em] text-slate-700 uppercase">
-            Próximos módulos
-          </div>
-
-          <div className="mt-2 space-y-1" aria-label="Módulos próximamente">
-            {futureNavigation.map((item) => (
-              <div
-                key={item.label}
-                className="flex h-9 cursor-not-allowed items-center gap-3 rounded-lg px-3 text-sm text-slate-600"
-                title="Este módulo se habilitará en los siguientes bloques"
-              >
-                <item.icon className="size-4" />
-                {item.label}
-              </div>
-            ))}
-          </div>
-        </nav>
+        <div className="px-6 pt-3 pb-1 font-mono text-[0.58rem] tracking-[0.16em] text-slate-700 uppercase">
+          Módulos
+        </div>
+        <DesktopAppNavigation />
 
         <div className="border-t border-sidebar-border p-3">
           <div className="mb-3 truncate px-3 text-xs text-slate-600">
@@ -131,22 +90,12 @@ export function AppShell({
 
         <main className="px-5 py-8 sm:px-7 lg:px-9 lg:py-10">{children}</main>
 
-        <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center justify-around border-t border-white/[0.06] bg-[#080d13]/95 backdrop-blur-xl lg:hidden">
-          <Link
-            href="/app"
-            className="nexus-focus flex flex-col items-center gap-1 rounded-lg px-5 py-2 text-primary"
-          >
-            <LayoutDashboard className="size-4" />
-            <span className="text-[0.62rem]">Panel</span>
-          </Link>
-          <div className="flex cursor-not-allowed flex-col items-center gap-1 px-5 py-2 text-slate-700">
-            <Wrench className="size-4" />
-            <span className="text-[0.62rem]">Próximamente</span>
-          </div>
-          <form action={signOut}>
+        <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center border-t border-white/[0.06] bg-[#080d13]/95 backdrop-blur-xl lg:hidden">
+          <MobileAppNavigation />
+          <form action={signOut} className="flex flex-1 justify-center">
             <button
               type="submit"
-              className="nexus-focus flex flex-col items-center gap-1 rounded-lg px-5 py-2 text-slate-500"
+              className="nexus-focus flex flex-col items-center gap-1 rounded-lg px-5 py-2 text-slate-600"
             >
               <LogOut className="size-4" />
               <span className="text-[0.62rem]">Salir</span>

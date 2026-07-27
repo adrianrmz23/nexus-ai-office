@@ -15,19 +15,23 @@ Actualizado: 26 de julio de 2026.
 - Onboarding para crear el primer workspace.
 - Dashboard protegido con información real de sesión y workspace.
 - RLS inicial para perfiles, workspaces y miembros.
+- Catálogo funcional de tecnologías.
+- Alta, edición, filtros, estados, archivo y restauración.
+- Auditoría inicial de cambios en tecnologías.
+- RLS para tecnologías y relaciones técnicas.
 - Validadores con Zod y pruebas unitarias.
 
 ## Siguiente bloque
 
-- Catálogo administrable de tecnologías.
-- Creación y edición de proyectos.
+- Gestión funcional de proyectos.
+- Asignación de tecnologías a proyectos.
+- Reglas, URLs y contexto permanente del proyecto.
+- Dashboard individual del proyecto.
+
+## Después
+
 - Catálogo inicial de agentes.
-- Asignación de tecnologías y agentes a proyectos.
-- Onboarding de tecnologías y primer proyecto.
-- Auditoría inicial de RLS.
-
-## Pendiente para fases posteriores
-
+- Asignación de agentes a proyectos.
 - Proveedores y modelos.
 - Chat y streaming.
 - Memoria semántica.
