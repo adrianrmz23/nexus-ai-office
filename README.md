@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NEXUS AI Office
 
-## Getting Started
+Centro personal de desarrollo asistido por IA construido con Next.js,
+TypeScript y Supabase. La plataforma administra workspaces, tecnologías,
+proyectos y agentes especializados, con aislamiento mediante RLS y una
+arquitectura preparada para múltiples proveedores de inteligencia artificial.
 
-First, run the development server:
+## Estado actual
+
+- Autenticación y onboarding funcionales.
+- Workspaces protegidos mediante RLS.
+- Catálogo de tecnologías.
+- Gestión de proyectos y contexto permanente.
+- Catálogo de agentes especializados.
+- Equipos por proyecto y recomendación inicial por stack.
+
+Consulta [`docs/BUILD_STATUS.md`](docs/BUILD_STATUS.md) para ver el avance y los
+siguientes bloques.
+
+## Desarrollo local
+
+Crea `.env.local` a partir de `.env.example` y configura las credenciales
+públicas de tu proyecto Supabase. Después ejecuta:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La aplicación estará disponible en `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Validación
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+```
 
-## Learn More
+## Migraciones
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ejecuta las migraciones de `supabase/migrations` en orden. No publiques
+`.env.local`, claves privadas ni tokens de proveedores.

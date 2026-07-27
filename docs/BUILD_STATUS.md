@@ -17,31 +17,38 @@ Actualizado: 26 de julio de 2026.
 - RLS inicial para perfiles, workspaces y miembros.
 - Catálogo funcional de tecnologías.
 - Alta, edición, filtros, estados, archivo y restauración de tecnologías.
-- Auditoría inicial de cambios en tecnologías.
-- RLS para tecnologías y relaciones técnicas.
+- Auditoría de cambios en tecnologías.
 - Gestión funcional de proyectos.
 - Asignación de tecnologías a proyectos.
 - Prioridades, estados, URLs y presupuesto operativo.
 - Contexto permanente, reglas y convenciones por proyecto.
 - Dashboard individual del proyecto.
 - Escrituras atómicas de proyecto y stack mediante PostgreSQL RPC.
-- Auditoría de proyectos y asignaciones.
-- Validadores con Zod y pruebas unitarias.
+- Catálogo funcional de agentes.
+- Ocho agentes iniciales por workspace.
+- Alta, edición, filtros, estados, archivo y restauración de agentes.
+- Instrucciones, creatividad, memoria y herramientas por agente.
+- Especialidades técnicas y colaboradores autorizados.
+- Página individual de cada agente.
+- Asignación de agentes a proyectos y designación de líder.
+- Recomendación determinista de equipo según rol y stack.
+- RLS, auditoría y RPC para agentes y equipos.
+- Validadores con Zod y pruebas unitarias esenciales.
 
 ## Siguiente bloque
 
-- Catálogo inicial de agentes.
-- Creación y edición de agentes personalizados.
-- Especialidades, tecnologías, instrucciones y permisos.
-- Asignación de agentes a proyectos.
-- Vista inicial del equipo por proyecto.
+- Proveedores de inteligencia artificial.
+- Catálogo administrable de modelos.
+- Capacidades, costos, disponibilidad y pruebas de conexión.
+- Almacenamiento seguro de credenciales del lado servidor.
+- Interfaz común de proveedores y adaptadores iniciales.
 
 ## Después
 
-- Proveedores y modelos.
 - Chat y streaming.
+- Adjuntos y contexto activo.
 - Memoria semántica.
 - Orquestación multiagente.
 - Handoffs, artefactos y tareas.
 - Recomendador de modelos.
-- Analítica y presupuestos.
+- Analítica, costos y presupuestos.

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import {
   Archive,
   ArrowLeft,
+  Bot,
   ArrowUpRight,
   CirclePause,
   Edit3,
@@ -12,6 +13,7 @@ import {
   Globe2,
   RotateCcw,
   ServerCog,
+  Users,
 } from "lucide-react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -19,6 +21,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { cn } from "@/lib/utils";
+import { loadProjectAgentAssignments } from "@/modules/agents/application/agent-queries";
+import { AGENT_ROLE_LABELS, getAgentIcon } from "@/modules/agents/domain/agent";
 import { setProjectStatus } from "@/modules/projects/application/project-actions";
 import { loadProjectTechnologies } from "@/modules/projects/application/project-queries";
 import {
@@ -126,6 +130,11 @@ export default async function ProjectDetailPage({
     [project.id],
   );
   const technologies = technologyResult.byProject.get(project.id) ?? [];
+  const assignedAgents = await loadProjectAgentAssignments(
+    supabase,
+    membership.workspaceId,
+    project.id,
+  );
   const iconElement = createElement(getProjectIcon(project.icon), {
     className: "size-6",
     "aria-hidden": true,
@@ -376,6 +385,74 @@ export default async function ProjectDetailPage({
             </article>
           ))}
         </div>
+      </section>
+
+
+      <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+          <div>
+            <div className="flex items-center gap-2">
+              <Users className="size-4 text-primary/70" />
+              <div className="nexus-kicker">Equipo del proyecto</div>
+            </div>
+            <h2 className="mt-2 text-base font-semibold text-slate-100">
+              Agentes asignados
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+              Administra especialistas, liderazgo y recomendaciones basadas en el
+              stack técnico del proyecto.
+            </p>
+          </div>
+          <Link
+            href={`/app/proyectos/${project.id}/agentes`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <Bot />
+            Administrar equipo
+          </Link>
+        </div>
+
+        {assignedAgents.length > 0 ? (
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {assignedAgents.slice(0, 4).map((assignment) => (
+              <Link
+                key={assignment.agent_id}
+                href={`/app/agentes/${assignment.agent.id}`}
+                className="nexus-focus flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.018] p-3.5 hover:border-primary/15"
+              >
+                <div
+                  className="grid size-9 shrink-0 place-items-center rounded-lg border"
+                  style={{
+                    color: assignment.agent.color,
+                    borderColor: `${assignment.agent.color}30`,
+                    backgroundColor: `${assignment.agent.color}0f`,
+                  }}
+                >
+                  {createElement(getAgentIcon(assignment.agent.icon), {
+                    className: "size-4",
+                    "aria-hidden": true,
+                  })}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-slate-200">
+                    {assignment.agent.name}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-600">
+                    {AGENT_ROLE_LABELS[assignment.agent.role]}
+                    {assignment.is_lead ? " · Líder" : ""}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-xl border border-dashed border-white/[0.08] bg-black/10 p-5">
+            <p className="text-sm leading-6 text-slate-600">
+              Aún no hay agentes asignados. Abre el equipo para consultar la
+              recomendación inicial de NEXUS.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">

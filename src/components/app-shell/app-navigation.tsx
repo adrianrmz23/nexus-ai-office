@@ -44,7 +44,8 @@ const navigation: NavigationItem[] = [
     label: "Agentes",
     href: "/app/agentes",
     icon: Bot,
-    enabled: false,
+    enabled: true,
+    mobileLabel: "Agentes",
   },
   {
     label: "Conversaciones",
@@ -137,7 +138,7 @@ export function MobileAppNavigation() {
   const mobileItems = navigation.filter(
     (item) =>
       item.enabled &&
-      ["/app", "/app/proyectos", "/app/tecnologias"].includes(item.href),
+      ["/app", "/app/proyectos", "/app/agentes", "/app/tecnologias"].includes(item.href),
   );
 
   return (

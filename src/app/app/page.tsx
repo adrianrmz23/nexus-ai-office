@@ -61,7 +61,7 @@ const managementModules = [
     title: "Agentes",
     detail: "Especialidades y asignación por proyecto",
     icon: Bot,
-    complete: false,
+    complete: true,
   },
 ];
 
@@ -73,6 +73,9 @@ export default async function AppDashboardPage() {
     projectCountResult,
     activeProjectCountResult,
     criticalProjectCountResult,
+    agentCountResult,
+    activeAgentCountResult,
+    projectAgentCountResult,
   ] = await Promise.all([
     supabase
       .from("technologies")
@@ -98,6 +101,20 @@ export default async function AppDashboardPage() {
       .eq("workspace_id", membership.workspaceId)
       .eq("priority", "critical")
       .neq("status", "archived"),
+    supabase
+      .from("agents")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId),
+    supabase
+      .from("agents")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
+    supabase
+      .from("project_agents")
+      .select("agent_id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
   ]);
 
   const technologyCount = technologyCountResult.count ?? 0;
@@ -105,6 +122,9 @@ export default async function AppDashboardPage() {
   const projectCount = projectCountResult.count ?? 0;
   const activeProjectCount = activeProjectCountResult.count ?? 0;
   const criticalProjectCount = criticalProjectCountResult.count ?? 0;
+  const agentCount = agentCountResult.count ?? 0;
+  const activeAgentCount = activeAgentCountResult.count ?? 0;
+  const projectAgentCount = projectAgentCountResult.count ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
@@ -115,9 +135,9 @@ export default async function AppDashboardPage() {
             La oficina ya administra trabajo real.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            La base segura, el catálogo técnico y los proyectos están conectados.
-            El siguiente bloque incorporará agentes especializados y sus
-            asignaciones.
+            La base segura, los proyectos y el equipo de agentes están conectados.
+            Ya puedes configurar especialistas y asignarlos mediante recomendaciones
+            verificables por stack técnico.
           </p>
         </div>
 
@@ -155,9 +175,9 @@ export default async function AppDashboardPage() {
             icon: ShieldCheck,
           },
           {
-            label: "Agentes asignados",
-            value: 0,
-            detail: "Se habilitarán en el próximo bloque",
+            label: "Agentes",
+            value: agentCount,
+            detail: `${activeAgentCount} activos · ${projectAgentCount} asignaciones`,
             icon: Bot,
           },
         ].map((item) => (
@@ -229,7 +249,7 @@ export default async function AppDashboardPage() {
                 Catálogos conectados con datos reales
               </div>
             </div>
-            <span className="font-mono text-xs text-primary">2 / 3</span>
+            <span className="font-mono text-xs text-primary">3 / 3</span>
           </div>
 
           <div className="mt-5 grid gap-2 lg:grid-cols-3">
@@ -264,13 +284,20 @@ export default async function AppDashboardPage() {
             ))}
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 border-t border-white/[0.055] pt-5 sm:flex-row">
+          <div className="mt-5 flex flex-col gap-3 border-t border-white/[0.055] pt-5 sm:flex-row sm:flex-wrap">
             <Link
               href="/app/proyectos"
               className={buttonVariants({ variant: "secondary" })}
             >
               <FolderKanban />
               Abrir proyectos
+            </Link>
+            <Link
+              href="/app/agentes"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <Bot />
+              Abrir agentes
             </Link>
             <Link
               href="/app/tecnologias"
