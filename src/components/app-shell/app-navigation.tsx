@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 type NavigationItem = {
   label: string;
+  mobileLabel?: string;
   href: string;
   icon: typeof LayoutDashboard;
   enabled: boolean;
@@ -26,6 +27,7 @@ type NavigationItem = {
 const navigation: NavigationItem[] = [
   {
     label: "Panel general",
+    mobileLabel: "Panel",
     href: "/app",
     icon: LayoutDashboard,
     enabled: true,
@@ -33,9 +35,10 @@ const navigation: NavigationItem[] = [
   },
   {
     label: "Proyectos",
+    mobileLabel: "Proyectos",
     href: "/app/proyectos",
     icon: FolderKanban,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Agentes",
@@ -51,6 +54,7 @@ const navigation: NavigationItem[] = [
   },
   {
     label: "Tecnologías",
+    mobileLabel: "Tecnologías",
     href: "/app/tecnologias",
     icon: Blocks,
     enabled: true,
@@ -75,10 +79,7 @@ const navigation: NavigationItem[] = [
   },
 ];
 
-function isActivePath(
-  pathname: string,
-  item: NavigationItem,
-): boolean {
+function isActivePath(pathname: string, item: NavigationItem): boolean {
   if (item.exact) {
     return pathname === item.href;
   }
@@ -134,7 +135,9 @@ export function DesktopAppNavigation() {
 export function MobileAppNavigation() {
   const pathname = usePathname();
   const mobileItems = navigation.filter(
-    (item) => item.href === "/app" || item.href === "/app/tecnologias",
+    (item) =>
+      item.enabled &&
+      ["/app", "/app/proyectos", "/app/tecnologias"].includes(item.href),
   );
 
   return (
@@ -148,14 +151,12 @@ export function MobileAppNavigation() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "nexus-focus flex flex-1 flex-col items-center gap-1 rounded-lg px-3 py-2",
+              "nexus-focus flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2",
               active ? "text-primary" : "text-slate-600",
             )}
           >
             <item.icon className="size-4" />
-            <span className="text-[0.62rem]">
-              {item.href === "/app" ? "Panel" : "Tecnologías"}
-            </span>
+            <span className="text-[0.58rem]">{item.mobileLabel}</span>
           </Link>
         );
       })}
