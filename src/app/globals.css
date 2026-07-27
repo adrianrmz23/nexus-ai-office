@@ -1,26 +1,144 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.75rem;
+  --background: #060a0f;
+  --foreground: #f1f6f7;
+  --card: #0b1219;
+  --card-foreground: #f1f6f7;
+  --popover: #0b1219;
+  --popover-foreground: #f1f6f7;
+  --primary: #55e6c1;
+  --primary-foreground: #03110d;
+  --secondary: #111c25;
+  --secondary-foreground: #d9e7e9;
+  --muted: #101820;
+  --muted-foreground: #8ca0a6;
+  --accent: #0f2930;
+  --accent-foreground: #9cf4df;
+  --destructive: #fb7185;
+  --border: rgb(137 208 216 / 14%);
+  --input: rgb(137 208 216 / 18%);
+  --ring: #55e6c1;
+  --sidebar: #080d13;
+  --sidebar-foreground: #d9e7e9;
+  --sidebar-primary: #55e6c1;
+  --sidebar-primary-foreground: #03110d;
+  --sidebar-accent: #0f1c24;
+  --sidebar-accent-foreground: #eef9f7;
+  --sidebar-border: rgb(137 208 216 / 12%);
+  --sidebar-ring: #55e6c1;
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
+  }
+
+  html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(
+        circle at 12% 0%,
+        rgb(18 92 104 / 17%),
+        transparent 30rem
+      ),
+      radial-gradient(circle at 88% 8%, rgb(24 91 75 / 12%), transparent 26rem);
+  }
+
+  ::selection {
+    color: #06100e;
+    background: #78ead0;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .nexus-grid {
+    background-image:
+      linear-gradient(rgb(104 190 199 / 5%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(104 190 199 / 5%) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black 20%, transparent 92%);
+  }
+
+  .nexus-panel {
+    background:
+      linear-gradient(180deg, rgb(14 24 33 / 94%), rgb(8 14 20 / 96%))
+        padding-box,
+      linear-gradient(145deg, rgb(124 238 220 / 25%), rgb(55 95 108 / 7%))
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      0 24px 80px rgb(0 0 0 / 26%),
+      inset 0 1px 0 rgb(255 255 255 / 3%);
+  }
+
+  .nexus-kicker {
+    @apply font-mono text-[0.68rem] font-medium tracking-[0.2em] uppercase;
+    color: #6fe1d0;
+  }
+
+  .nexus-muted {
+    color: #8ca0a6;
+  }
+
+  .nexus-focus {
+    @apply focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none;
+  }
+
+  .nexus-scrollbar {
+    scrollbar-color: rgb(86 143 149 / 50%) transparent;
+    scrollbar-width: thin;
+  }
 }

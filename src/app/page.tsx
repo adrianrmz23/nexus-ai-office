@@ -1,65 +1,199 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Bot,
+  Boxes,
+  BrainCircuit,
+  Cable,
+  Check,
+  DatabaseZap,
+  Route,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
-export default function Home() {
+import { HeroConsole } from "@/components/landing/hero-console";
+import { LandingHeader } from "@/components/landing/landing-header";
+import { buttonVariants } from "@/components/ui/button";
+
+const capabilities = [
+  {
+    icon: Boxes,
+    title: "Proyectos con contexto propio",
+    description:
+      "Tecnologías, reglas, archivos, decisiones y memoria separadas por proyecto.",
+  },
+  {
+    icon: Bot,
+    title: "Agentes especializados",
+    description:
+      "Diseño, frontend, backend, Shopify, debugging, arquitectura y QA.",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Memoria verificable",
+    description:
+      "Consulta qué información se recuperó, su fuente y por qué fue utilizada.",
+  },
+  {
+    icon: Route,
+    title: "Colaboración observable",
+    description:
+      "Handoffs, tareas, costos y resultados visibles antes de aprobar cambios.",
+  },
+  {
+    icon: Cable,
+    title: "Proveedores desacoplados",
+    description:
+      "OpenAI, Anthropic, Gemini, Kimi, OpenRouter y modelos compatibles.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Seguridad desde la base",
+    description:
+      "RLS, permisos, separación por oficina y confirmación de acciones sensibles.",
+  },
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="relative overflow-hidden">
+      <div className="nexus-grid pointer-events-none absolute inset-x-0 top-0 h-[58rem]" />
+      <LandingHeader />
+
+      <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pt-20 pb-24 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:pt-28 lg:pb-32">
+        <div className="relative z-10 max-w-xl">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/[0.045] px-3 py-1.5">
+            <Sparkles className="size-3.5 text-primary" />
+            <span className="nexus-kicker">Developer operations system</span>
+          </div>
+
+          <h1 className="max-w-[12ch] text-[2.75rem] leading-[1.04] font-semibold tracking-[-0.045em] text-balance text-white sm:text-[3.45rem]">
+            Tu oficina técnica, coordinada por IA.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+          <p className="mt-6 max-w-lg text-base leading-7 text-slate-400 sm:text-[1.05rem]">
+            Organiza proyectos reales, crea agentes expertos y selecciona el
+            modelo adecuado para cada tarea sin perder contexto, control ni
+            trazabilidad.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/registro" className={buttonVariants({ size: "lg" })}>
+              Crear mi oficina
+              <ArrowRight />
+            </Link>
+            <Link
+              href="/iniciar-sesion"
+              className={buttonVariants({
+                variant: "outline",
+                size: "lg",
+              })}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Ya tengo una cuenta
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
+            {["Memoria por proyecto", "Multi-modelo", "Control humano"].map(
+              (item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <Check className="size-3.5 text-primary/75" />
+                  {item}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+
+        <HeroConsole />
+      </section>
+
+      <section
+        id="capacidades"
+        className="relative border-y border-white/[0.05] bg-black/10"
+      >
+        <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
+          <div className="max-w-2xl">
+            <div className="nexus-kicker">Capacidades del sistema</div>
+            <h2 className="mt-4 text-3xl leading-tight font-semibold tracking-[-0.035em] text-white">
+              Un centro de trabajo, no otro chat aislado.
+            </h2>
+            <p className="mt-4 leading-7 text-slate-400">
+              NEXUS conecta conocimiento, ejecución y decisiones para que cada
+              proyecto acumule experiencia útil.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-2 lg:grid-cols-3">
+            {capabilities.map((capability) => (
+              <article
+                key={capability.title}
+                className="min-h-48 bg-[#080d13] p-6 transition-colors hover:bg-[#0a1118]"
+              >
+                <div className="grid size-10 place-items-center rounded-xl border border-primary/15 bg-primary/[0.045]">
+                  <capability.icon className="size-4.5 text-primary/85" />
+                </div>
+                <h3 className="mt-5 text-sm font-semibold text-slate-100">
+                  {capability.title}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-slate-500">
+                  {capability.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="arquitectura"
+        className="mx-auto grid max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:items-center"
+      >
+        <div>
+          <div className="nexus-kicker">Arquitectura preparada para crecer</div>
+          <h2 className="mt-4 max-w-lg text-3xl leading-tight font-semibold tracking-[-0.035em] text-white">
+            El proyecto sigue siendo tuyo. El proveedor es intercambiable.
+          </h2>
+          <p className="mt-5 max-w-xl leading-7 text-slate-400">
+            Los agentes trabajan contra interfaces comunes. Cambiar de modelo o
+            combinar proveedores no obliga a reescribir la lógica del producto.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="nexus-panel rounded-2xl p-5 sm:p-6">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <div className="rounded-xl border border-white/[0.06] bg-black/10 p-4">
+              <DatabaseZap className="size-4 text-cyan-200/75" />
+              <div className="mt-4 text-xs font-semibold text-slate-200">
+                Contexto del proyecto
+              </div>
+              <div className="mt-1.5 font-mono text-[0.58rem] text-slate-600">
+                Memoria · archivos · reglas
+              </div>
+            </div>
+
+            <ArrowRight className="size-4 text-slate-700" />
+
+            <div className="rounded-xl border border-primary/15 bg-primary/[0.035] p-4">
+              <BrainCircuit className="size-4 text-primary/80" />
+              <div className="mt-4 text-xs font-semibold text-slate-200">
+                Orquestador
+              </div>
+              <div className="mt-1.5 font-mono text-[0.58rem] text-slate-600">
+                Modelo · agentes · herramientas
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <footer className="border-t border-white/[0.05]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-8 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <span>NEXUS AI Office</span>
+          <span>Construido para trabajo técnico real.</span>
+        </div>
+      </footer>
+    </main>
   );
 }
