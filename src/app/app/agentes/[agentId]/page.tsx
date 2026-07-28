@@ -12,8 +12,12 @@ import {
 } from "lucide-react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { ModelPreferencePanel } from "@/components/models/model-preference-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { setAgentModelPreference } from "@/modules/models/application/model-actions";
+import { loadActiveModelOptions } from "@/modules/models/application/model-queries";
+import type { ModelPreferenceRecord } from "@/modules/models/domain/model";
 import {
   loadAgentCollaborators,
   loadAgentTechnologies,
@@ -72,13 +76,29 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
 
   if (!agentResult.data) notFound();
   const agent = agentResult.data as AgentRecord;
-  const [technologyResult, collaboratorsByAgent] = await Promise.all([
+  const [
+    technologyResult,
+    collaboratorsByAgent,
+    modelOptions,
+    modelPreferenceResult,
+  ] = await Promise.all([
     loadAgentTechnologies(supabase, membership.workspaceId, [agent.id]),
     loadAgentCollaborators(supabase, membership.workspaceId, [agent.id]),
+    loadActiveModelOptions(supabase, membership.workspaceId),
+    supabase
+      .from("agent_model_preferences")
+      .select("preferred_model_id, selection_mode, alternative_model_ids")
+      .eq("workspace_id", membership.workspaceId)
+      .eq("agent_id", agent.id)
+      .maybeSingle(),
   ]);
   const technologies = technologyResult.byAgent.get(agent.id) ?? [];
   const collaborators = collaboratorsByAgent.get(agent.id) ?? [];
   const projectAssignments = (projectAssignmentsResult.data ?? []) as unknown as RawProjectAssignment[];
+  const modelPreference = (modelPreferenceResult.data ?? null) as ModelPreferenceRecord | null;
+  const selectedModel = modelOptions.find(
+    (model) => model.id === modelPreference?.preferred_model_id,
+  );
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
@@ -164,19 +184,35 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <BrainCircuit className="size-4 text-primary/70" />
-            <div className="text-sm font-semibold text-slate-100">Modelo preparado</div>
+            <div className="text-sm font-semibold text-slate-100">Estrategia de IA</div>
           </div>
           <div className="mt-5 rounded-xl border border-white/[0.055] bg-black/10 p-4">
-            <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Preferido</div>
-            <div className="mt-2 text-sm text-slate-300">{agent.preferred_model_key ?? "Selección automática"}</div>
+            <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Modelo principal</div>
+            <div className="mt-2 text-sm text-slate-300">
+              {selectedModel
+                ? `${selectedModel.providerName} — ${selectedModel.displayName}`
+                : "Selección automática"}
+            </div>
           </div>
           <div className="mt-3 text-xs leading-5 text-slate-600">
-            {agent.alternative_model_keys.length > 0
-              ? `Alternativas: ${agent.alternative_model_keys.join(", ")}`
-              : "Las alternativas se configurarán con el catálogo de modelos."}
+            {modelPreference?.selection_mode === "fixed"
+              ? "El agente intentará usar el modelo configurado antes de evaluar alternativas."
+              : "NEXUS podrá elegir el modelo más conveniente según la tarea y el proyecto."}
           </div>
         </article>
       </section>
+
+      <ModelPreferencePanel
+        title="Preferencias del agente"
+        description="Define un modelo principal y alternativas. La lógica del agente seguirá usando el gateway común, por lo que esta preferencia no lo acopla a un proveedor."
+        action={setAgentModelPreference}
+        entityField="agentId"
+        entityId={agent.id}
+        models={modelOptions}
+        preference={modelPreference}
+        mode="agent"
+        canManage={canManage}
+      />
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Instrucciones principales</div>

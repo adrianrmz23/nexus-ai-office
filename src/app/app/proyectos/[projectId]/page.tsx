@@ -17,12 +17,16 @@ import {
 } from "lucide-react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { ModelPreferencePanel } from "@/components/models/model-preference-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { cn } from "@/lib/utils";
 import { loadProjectAgentAssignments } from "@/modules/agents/application/agent-queries";
 import { AGENT_ROLE_LABELS, getAgentIcon } from "@/modules/agents/domain/agent";
+import { setProjectModelPreference } from "@/modules/models/application/model-actions";
+import { loadActiveModelOptions } from "@/modules/models/application/model-queries";
+import type { ModelPreferenceRecord } from "@/modules/models/domain/model";
 import { setProjectStatus } from "@/modules/projects/application/project-actions";
 import { loadProjectTechnologies } from "@/modules/projects/application/project-queries";
 import {
@@ -124,17 +128,32 @@ export default async function ProjectDetailPage({
   }
 
   const project = data as ProjectRecord;
-  const technologyResult = await loadProjectTechnologies(
-    supabase,
-    membership.workspaceId,
-    [project.id],
-  );
+  const [
+    technologyResult,
+    assignedAgents,
+    modelOptions,
+    modelPreferenceResult,
+  ] = await Promise.all([
+    loadProjectTechnologies(
+      supabase,
+      membership.workspaceId,
+      [project.id],
+    ),
+    loadProjectAgentAssignments(
+      supabase,
+      membership.workspaceId,
+      project.id,
+    ),
+    loadActiveModelOptions(supabase, membership.workspaceId),
+    supabase
+      .from("project_model_preferences")
+      .select("preferred_model_id, budget_profile, speed_preference")
+      .eq("workspace_id", membership.workspaceId)
+      .eq("project_id", project.id)
+      .maybeSingle(),
+  ]);
   const technologies = technologyResult.byProject.get(project.id) ?? [];
-  const assignedAgents = await loadProjectAgentAssignments(
-    supabase,
-    membership.workspaceId,
-    project.id,
-  );
+  const modelPreference = (modelPreferenceResult.data ?? null) as ModelPreferenceRecord | null;
   const iconElement = createElement(getProjectIcon(project.icon), {
     className: "size-6",
     "aria-hidden": true,
@@ -454,6 +473,18 @@ export default async function ProjectDetailPage({
           </div>
         )}
       </section>
+
+      <ModelPreferencePanel
+        title="Estrategia de modelos del proyecto"
+        description="Establece el modelo predeterminado, el perfil de presupuesto y la velocidad deseada. El recomendador podrá respetar estas preferencias o explicar por qué propone una alternativa."
+        action={setProjectModelPreference}
+        entityField="projectId"
+        entityId={project.id}
+        models={modelOptions}
+        preference={modelPreference}
+        mode="project"
+        canManage={canManage}
+      />
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Contexto estructurado</div>

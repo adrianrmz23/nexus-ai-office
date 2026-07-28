@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   CircleDashed,
   Database,
+  Cpu,
   Fingerprint,
   FolderKanban,
   Layers3,
@@ -63,6 +64,12 @@ const managementModules = [
     icon: Bot,
     complete: true,
   },
+  {
+    title: "Modelos IA",
+    detail: "Proveedores, capacidades y recomendación",
+    icon: Cpu,
+    complete: true,
+  },
 ];
 
 export default async function AppDashboardPage() {
@@ -72,7 +79,8 @@ export default async function AppDashboardPage() {
     activeTechnologyCountResult,
     projectCountResult,
     activeProjectCountResult,
-    criticalProjectCountResult,
+    providerCountResult,
+    activeModelCountResult,
     agentCountResult,
     activeAgentCountResult,
     projectAgentCountResult,
@@ -96,11 +104,15 @@ export default async function AppDashboardPage() {
       .eq("workspace_id", membership.workspaceId)
       .eq("status", "active"),
     supabase
-      .from("projects")
+      .from("ai_providers")
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
-      .eq("priority", "critical")
-      .neq("status", "archived"),
+      .eq("status", "active"),
+    supabase
+      .from("ai_models")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
     supabase
       .from("agents")
       .select("id", { count: "exact", head: true })
@@ -121,7 +133,8 @@ export default async function AppDashboardPage() {
   const activeTechnologyCount = activeTechnologyCountResult.count ?? 0;
   const projectCount = projectCountResult.count ?? 0;
   const activeProjectCount = activeProjectCountResult.count ?? 0;
-  const criticalProjectCount = criticalProjectCountResult.count ?? 0;
+  const providerCount = providerCountResult.count ?? 0;
+  const activeModelCount = activeModelCountResult.count ?? 0;
   const agentCount = agentCountResult.count ?? 0;
   const activeAgentCount = activeAgentCountResult.count ?? 0;
   const projectAgentCount = projectAgentCountResult.count ?? 0;
@@ -135,9 +148,9 @@ export default async function AppDashboardPage() {
             La oficina ya administra trabajo real.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            La base segura, los proyectos y el equipo de agentes están conectados.
-            Ya puedes configurar especialistas y asignarlos mediante recomendaciones
-            verificables por stack técnico.
+            La base segura, los proyectos, los agentes y el catálogo de modelos están
+            conectados. Ya puedes preparar proveedores, registrar capacidades y definir
+            estrategias por proyecto sin acoplar la oficina a una sola IA.
           </p>
         </div>
 
@@ -169,10 +182,10 @@ export default async function AppDashboardPage() {
             icon: FolderKanban,
           },
           {
-            label: "Prioridad crítica",
-            value: criticalProjectCount,
-            detail: "Proyectos no archivados",
-            icon: ShieldCheck,
+            label: "Modelos IA",
+            value: activeModelCount,
+            detail: `${providerCount} proveedores activos`,
+            icon: Cpu,
           },
           {
             label: "Agentes",
@@ -249,10 +262,10 @@ export default async function AppDashboardPage() {
                 Catálogos conectados con datos reales
               </div>
             </div>
-            <span className="font-mono text-xs text-primary">3 / 3</span>
+            <span className="font-mono text-xs text-primary">4 / 4</span>
           </div>
 
-          <div className="mt-5 grid gap-2 lg:grid-cols-3">
+          <div className="mt-5 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
             {managementModules.map((item) => (
               <article
                 key={item.title}
@@ -305,6 +318,13 @@ export default async function AppDashboardPage() {
             >
               <Blocks />
               Abrir tecnologías
+            </Link>
+            <Link
+              href="/app/modelos"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <Cpu />
+              Abrir modelos IA
             </Link>
           </div>
         </section>

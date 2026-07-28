@@ -10,6 +10,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   MessageSquareText,
+  Cpu,
   Settings2,
 } from "lucide-react";
 
@@ -46,6 +47,13 @@ const navigation: NavigationItem[] = [
     icon: Bot,
     enabled: true,
     mobileLabel: "Agentes",
+  },
+  {
+    label: "Modelos IA",
+    mobileLabel: "Modelos",
+    href: "/app/modelos",
+    icon: Cpu,
+    enabled: true,
   },
   {
     label: "Conversaciones",
@@ -138,7 +146,7 @@ export function MobileAppNavigation() {
   const mobileItems = navigation.filter(
     (item) =>
       item.enabled &&
-      ["/app", "/app/proyectos", "/app/agentes", "/app/tecnologias"].includes(item.href),
+      ["/app", "/app/proyectos", "/app/agentes", "/app/modelos", "/app/tecnologias"].includes(item.href),
   );
 
   return (

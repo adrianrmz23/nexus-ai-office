@@ -478,41 +478,45 @@ export function AgentForm({
       </section>
 
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
-        <div>
-          <div className="nexus-kicker">Modelo preferido</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
-            Preparación para proveedores
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Estos identificadores son opcionales. El catálogo administrable de
-            proveedores y modelos se conectará en el siguiente bloque.
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="preferredModelKey">Modelo preferido</Label>
-            <Input
-              id="preferredModelKey"
-              name="preferredModelKey"
-              defaultValue={values.preferredModelKey}
-              placeholder="Ej. openai/gpt-5"
-              maxLength={150}
-            />
+        <input
+          type="hidden"
+          name="preferredModelKey"
+          value={values.preferredModelKey}
+        />
+        <input
+          type="hidden"
+          name="alternativeModelKeys"
+          value={values.alternativeModelKeys}
+        />
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/10 bg-primary/[0.045]">
+              <BrainCircuit className="size-4 text-primary/80" />
+            </div>
+            <div>
+              <div className="nexus-kicker">Estrategia de modelos</div>
+              <h2 className="mt-2 text-base font-semibold text-slate-100">
+                Preferencias desacopladas del agente
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                El modelo principal y sus alternativas se administran desde el perfil
+                del agente usando el catálogo real de la oficina.
+              </p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="alternativeModelKeys">Alternativas</Label>
-            <Input
-              id="alternativeModelKeys"
-              name="alternativeModelKeys"
-              defaultValue={values.alternativeModelKeys}
-              placeholder="anthropic/claude, google/gemini"
-              maxLength={800}
-            />
-            <p className="text-xs leading-5 text-slate-600">
-              Separa hasta cinco identificadores con comas.
-            </p>
-          </div>
+          {mode === "edit" && agentId ? (
+            <Link
+              href={`/app/agentes/${agentId}`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <BrainCircuit />
+              Configurar modelos
+            </Link>
+          ) : (
+            <span className="text-xs leading-5 text-slate-600">
+              Guarda el agente para configurar sus modelos.
+            </span>
+          )}
         </div>
       </section>
 
