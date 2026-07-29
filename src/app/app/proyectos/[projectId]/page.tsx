@@ -16,6 +16,9 @@ import {
   RotateCcw,
   ServerCog,
   Users,
+  ListTodo,
+  PackageOpen,
+  Gavel,
 } from "lucide-react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -135,6 +138,10 @@ export default async function ProjectDetailPage({
     assignedAgents,
     modelOptions,
     modelPreferenceResult,
+    taskCountResult,
+    artifactCountResult,
+    decisionCountResult,
+    errorCountResult,
   ] = await Promise.all([
     loadProjectTechnologies(
       supabase,
@@ -153,6 +160,10 @@ export default async function ProjectDetailPage({
       .eq("workspace_id", membership.workspaceId)
       .eq("project_id", project.id)
       .maybeSingle(),
+    supabase.from("tasks").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
+    supabase.from("artifacts").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
+    supabase.from("project_decisions").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id),
+    supabase.from("error_solutions").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
   ]);
   const technologies = technologyResult.byProject.get(project.id) ?? [];
   const modelPreference = (modelPreferenceResult.data ?? null) as ModelPreferenceRecord | null;
@@ -492,6 +503,45 @@ export default async function ProjectDetailPage({
             </p>
           </div>
         )}
+      </section>
+
+      <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+          <div>
+            <div className="nexus-kicker">Trabajo profesional</div>
+            <h2 className="mt-2 text-base font-semibold text-slate-100">
+              Tareas, artefactos y registro técnico
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              Convierte conversaciones en trabajo verificable, conserva versiones y registra decisiones o soluciones aceptadas.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/app/tareas?project=${project.id}`} className={buttonVariants({ variant: "outline" })}>
+              <ListTodo /> Ver tareas
+            </Link>
+            <Link href={`/app/artefactos?project=${project.id}`} className={buttonVariants({ variant: "outline" })}>
+              <PackageOpen /> Ver artefactos
+            </Link>
+            <Link href={`/app/proyectos/${project.id}/registro`} className={buttonVariants({ variant: "secondary" })}>
+              <Gavel /> Registro técnico
+            </Link>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { label: "Tareas", value: taskCountResult.count ?? 0, icon: ListTodo },
+            { label: "Artefactos", value: artifactCountResult.count ?? 0, icon: PackageOpen },
+            { label: "Decisiones", value: decisionCountResult.count ?? 0, icon: Gavel },
+            { label: "Errores resueltos", value: errorCountResult.count ?? 0, icon: BrainCircuit },
+          ].map((item) => (
+            <article key={item.label} className="rounded-xl border border-white/[0.055] bg-black/10 p-4">
+              {createElement(item.icon, { className: "size-4 text-primary/70", "aria-hidden": true })}
+              <div className="mt-4 text-2xl font-semibold text-white">{item.value}</div>
+              <div className="mt-1 text-xs text-slate-600">{item.label}</div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <ModelPreferencePanel

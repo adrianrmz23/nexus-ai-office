@@ -63,6 +63,7 @@ export default async function ConversationPage({ params }: Props) {
         <ChatWorkspace
           conversation={{
             id: conversation.id,
+            projectId: conversation.project_id,
             title: conversation.title,
             mode: conversation.mode,
             selectedAgentId: conversation.selected_agent_id,

@@ -10,17 +10,17 @@
 - Bloque 06: conversaciones persistentes y streaming real.
 - Bloque 07: documentos, memoria estructurada y recuperación híbrida.
 - Bloque 08: orquestación multiagente, runs hijos y handoffs observables.
+- Bloque 09: tareas, artefactos versionados, revisión y registro técnico.
 
 ## Fase actual
 
-Fase 5 — Multiagente.
+Fase 7 — Herramientas profesionales.
 
 ## Pendiente inmediato
 
-- Tareas, subtareas y dependencias persistentes.
-- Artefactos versionados y aprobación humana.
-- Diffs de código con aceptación o rechazo.
-- Herramientas profesionales con permisos por agente.
+- Integración con repositorios y lectura segura de archivos.
+- Parches aplicables y validación automática de cambios.
+- Tool calling confirmado para que agentes propongan tareas y artefactos dentro del runtime.
 - Selección de modelo y presupuesto por paso.
+- Analítica consolidada de agentes, tareas, artefactos, costo y calidad.
 - Cola asíncrona para ejecuciones largas y recuperación ante interrupciones.
-- Analítica consolidada de agentes, handoffs, costo y calidad.

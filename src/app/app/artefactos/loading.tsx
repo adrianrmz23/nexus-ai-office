@@ -1,0 +1,1 @@
+export default function LoadingArtifacts() { return <div className="mx-auto max-w-7xl animate-pulse"><div className="h-8 w-48 rounded bg-white/[0.05]" /><div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <div key={index} className="h-64 rounded-2xl border border-white/[0.05] bg-white/[0.015]" />)}</div></div>; }

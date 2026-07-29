@@ -12,6 +12,8 @@ import {
   MessageSquareText,
   Cpu,
   Settings2,
+  ListTodo,
+  PackageOpen,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -60,6 +62,20 @@ const navigation: NavigationItem[] = [
     mobileLabel: "Chat",
     href: "/app/conversaciones",
     icon: MessageSquareText,
+    enabled: true,
+  },
+  {
+    label: "Tareas",
+    mobileLabel: "Tareas",
+    href: "/app/tareas",
+    icon: ListTodo,
+    enabled: true,
+  },
+  {
+    label: "Artefactos",
+    mobileLabel: "Artefactos",
+    href: "/app/artefactos",
+    icon: PackageOpen,
     enabled: true,
   },
   {
@@ -148,7 +164,7 @@ export function MobileAppNavigation() {
   const mobileItems = navigation.filter(
     (item) =>
       item.enabled &&
-      ["/app", "/app/proyectos", "/app/agentes", "/app/modelos", "/app/conversaciones"].includes(item.href),
+      ["/app", "/app/proyectos", "/app/tareas", "/app/conversaciones", "/app/agentes"].includes(item.href),
   );
 
   return (

@@ -12,6 +12,8 @@ import {
   FolderKanban,
   Layers3,
   MessageSquareText,
+  ListTodo,
+  PackageOpen,
   ShieldCheck,
   Workflow,
 } from "lucide-react";
@@ -90,6 +92,8 @@ export default async function AppDashboardPage() {
     completedRunCountResult,
     teamExecutionCountResult,
     completedHandoffCountResult,
+    activeTaskCountResult,
+    artifactCountResult,
   ] = await Promise.all([
     supabase
       .from("technologies")
@@ -153,6 +157,16 @@ export default async function AppDashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
       .eq("status", "completed"),
+    supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .in("status", ["backlog", "in_progress", "review"]),
+    supabase
+      .from("artifacts")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .neq("status", "archived"),
   ]);
 
   const technologyCount = technologyCountResult.count ?? 0;
@@ -168,6 +182,8 @@ export default async function AppDashboardPage() {
   const completedRunCount = completedRunCountResult.count ?? 0;
   const teamExecutionCount = teamExecutionCountResult.count ?? 0;
   const completedHandoffCount = completedHandoffCountResult.count ?? 0;
+  const activeTaskCount = activeTaskCountResult.count ?? 0;
+  const artifactCount = artifactCountResult.count ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
@@ -179,8 +195,8 @@ export default async function AppDashboardPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             La base segura, los proyectos, agentes y modelos ya ejecutan conversaciones reales.
-            El modo equipo delega subtareas verificables, registra handoffs y conserva historial,
-            modelos, costos, duración y contexto aislado por proyecto.
+            El modo equipo delega subtareas verificables y ahora cada resultado puede convertirse
+            en tareas, artefactos versionados, decisiones y soluciones con trazabilidad completa.
           </p>
         </div>
 
@@ -197,7 +213,7 @@ export default async function AppDashboardPage() {
         </div>
       </div>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
             label: "Tecnologías",
@@ -234,6 +250,18 @@ export default async function AppDashboardPage() {
             value: completedHandoffCount,
             detail: `${teamExecutionCount} ejecuciones de equipo`,
             icon: Workflow,
+          },
+          {
+            label: "Tareas activas",
+            value: activeTaskCount,
+            detail: "Backlog, ejecución y revisión",
+            icon: ListTodo,
+          },
+          {
+            label: "Artefactos",
+            value: artifactCount,
+            detail: "Entregables versionados",
+            icon: PackageOpen,
           },
         ].map((item) => (
           <article key={item.label} className="nexus-panel rounded-2xl p-5">
@@ -374,6 +402,20 @@ export default async function AppDashboardPage() {
             >
               <MessageSquareText />
               Abrir conversaciones
+            </Link>
+            <Link
+              href="/app/tareas"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <ListTodo />
+              Abrir tareas
+            </Link>
+            <Link
+              href="/app/artefactos"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <PackageOpen />
+              Abrir artefactos
             </Link>
           </div>
         </section>

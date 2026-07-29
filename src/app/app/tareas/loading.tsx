@@ -1,0 +1,1 @@
+export default function LoadingTasks() { return <div className="mx-auto max-w-[100rem] animate-pulse"><div className="h-8 w-56 rounded bg-white/[0.05]" /><div className="mt-8 grid gap-4 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-96 rounded-2xl border border-white/[0.05] bg-white/[0.015]" />)}</div></div>; }

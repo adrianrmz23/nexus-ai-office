@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -27,6 +28,10 @@ import {
   Users,
   Workflow,
   X,
+  ListTodo,
+  PackagePlus,
+  Gavel,
+  Bug,
 } from "lucide-react";
 
 import { MessageMarkdown } from "@/components/conversations/message-markdown";
@@ -138,6 +143,7 @@ export function ChatWorkspace({
 }: {
   conversation: {
     id: string;
+    projectId: string;
     title: string;
     mode: ConversationMode;
     selectedAgentId: string | null;
@@ -967,6 +973,34 @@ export function ChatWorkspace({
                       {message.error_message}
                     </div>
                   )}
+                  {!userMessage && message.status === "completed" && message.content && !message.id.startsWith("assistant-") ? (
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.05] pt-3">
+                      <Link
+                        href={`/app/tareas/nueva?project=${conversation.projectId}&conversation=${conversation.id}&message=${message.id}`}
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-primary/20 hover:text-primary"
+                      >
+                        <ListTodo className="size-3.5" /> Crear tarea
+                      </Link>
+                      <Link
+                        href={`/app/artefactos/nuevo?project=${conversation.projectId}&conversation=${conversation.id}&message=${message.id}`}
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-primary/20 hover:text-primary"
+                      >
+                        <PackagePlus className="size-3.5" /> Guardar artefacto
+                      </Link>
+                      <Link
+                        href={`/app/proyectos/${conversation.projectId}/registro?conversation=${conversation.id}&message=${message.id}&agent=${message.agent_id ?? ""}`}
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-violet-400/20 hover:text-violet-300"
+                      >
+                        <Gavel className="size-3.5" /> Registrar decisión
+                      </Link>
+                      <Link
+                        href={`/app/proyectos/${conversation.projectId}/registro?conversation=${conversation.id}&message=${message.id}&agent=${message.agent_id ?? ""}#errores`}
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-rose-400/20 hover:text-rose-300"
+                      >
+                        <Bug className="size-3.5" /> Error y solución
+                      </Link>
+                    </div>
+                  ) : null}
                   <div className="mt-2 text-right text-[0.58rem] text-slate-700">
                     {formatTime(message.created_at)}
                   </div>
