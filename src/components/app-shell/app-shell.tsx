@@ -83,7 +83,7 @@ export function AppShell({
           <div className="flex items-center gap-2 rounded-full border border-primary/10 bg-primary/[0.04] px-3 py-1.5">
             <span className="size-1.5 rounded-full bg-primary shadow-[0_0_9px_#55e6c1]" />
             <span className="font-mono text-[0.58rem] tracking-wider text-primary/80 uppercase">
-              Fase 3
+              Fase 5
             </span>
           </div>
         </header>

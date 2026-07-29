@@ -10,8 +10,10 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
+  ArrowRight,
   Bot,
   BookOpenText,
+  CheckCircle2,
   CircleStop,
   Clock3,
   Cpu,
@@ -21,10 +23,13 @@ import {
   Send,
   Sparkles,
   Trash2,
+  TriangleAlert,
   Users,
+  Workflow,
   X,
 } from "lucide-react";
 
+import { MessageMarkdown } from "@/components/conversations/message-markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
@@ -284,6 +289,7 @@ export function ChatWorkspace({
           language: attachment.language,
         })),
         retrievalSources: [],
+        teamExecution: null,
       },
       {
         id: optimisticAssistantId,
@@ -314,6 +320,22 @@ export function ChatWorkspace({
           : null,
         attachments: [],
         retrievalSources: [],
+        teamExecution:
+          mode === "team"
+            ? {
+                id: `team-${optimisticAssistantId}`,
+                status: "planning",
+                summary: "El orquestador está preparando el plan operativo.",
+                generatedBy: null,
+                specialistCount: 0,
+                totalInputTokens: null,
+                totalOutputTokens: null,
+                totalEstimatedCost: null,
+                currency: "USD",
+                durationMs: null,
+                handoffs: [],
+              }
+            : null,
         pending: true,
       },
     ]);
@@ -379,6 +401,154 @@ export function ChatWorkspace({
           return;
         }
 
+        if (streamEvent.type === "team_plan") {
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantId || message.id === optimisticAssistantId
+                ? {
+                    ...message,
+                    teamExecution: {
+                      id: streamEvent.executionId,
+                      status: "delegating",
+                      summary: streamEvent.summary,
+                      generatedBy: streamEvent.generatedBy,
+                      specialistCount: streamEvent.steps.length,
+                      totalInputTokens: null,
+                      totalOutputTokens: null,
+                      totalEstimatedCost: null,
+                      currency: "USD",
+                      durationMs: null,
+                      handoffs: [],
+                    },
+                  }
+                : message,
+            ),
+          );
+          return;
+        }
+
+        if (streamEvent.type === "handoff_started") {
+          setMessages((current) =>
+            current.map((message) => {
+              if (message.id !== assistantId && message.id !== optimisticAssistantId) {
+                return message;
+              }
+              const execution = message.teamExecution;
+              if (!execution) return message;
+              return {
+                ...message,
+                teamExecution: {
+                  ...execution,
+                  status: "delegating",
+                  handoffs: [
+                    ...execution.handoffs.filter(
+                      (handoff) => handoff.id !== streamEvent.handoffId,
+                    ),
+                    {
+                      id: streamEvent.handoffId,
+                      sequenceNumber: streamEvent.sequenceNumber,
+                      status: "running" as const,
+                      reason: streamEvent.objective,
+                      resultSummary: "",
+                      sourceAgent: streamEvent.sourceAgent,
+                      targetAgent: streamEvent.targetAgent,
+                      model: {
+                        id: streamEvent.model.id,
+                        displayName: streamEvent.model.displayName,
+                        providerName: streamEvent.model.providerName,
+                      },
+                      inputTokens: null,
+                      outputTokens: null,
+                      estimatedCost: null,
+                      currency: "USD",
+                      durationMs: null,
+                    },
+                  ].sort((left, right) => left.sequenceNumber - right.sequenceNumber),
+                },
+              };
+            }),
+          );
+          return;
+        }
+
+        if (streamEvent.type === "handoff_completed") {
+          setMessages((current) =>
+            current.map((message) => {
+              if (message.id !== assistantId && message.id !== optimisticAssistantId) {
+                return message;
+              }
+              const execution = message.teamExecution;
+              if (!execution) return message;
+              return {
+                ...message,
+                teamExecution: {
+                  ...execution,
+                  handoffs: execution.handoffs.map((handoff) =>
+                    handoff.id === streamEvent.handoffId
+                      ? {
+                          ...handoff,
+                          status: "completed",
+                          resultSummary: streamEvent.resultSummary,
+                          inputTokens: streamEvent.inputTokens,
+                          outputTokens: streamEvent.outputTokens,
+                          estimatedCost: streamEvent.estimatedCost,
+                          currency: streamEvent.currency,
+                          durationMs: streamEvent.durationMs,
+                        }
+                      : handoff,
+                  ),
+                },
+              };
+            }),
+          );
+          return;
+        }
+
+        if (streamEvent.type === "handoff_failed") {
+          setMessages((current) =>
+            current.map((message) => {
+              if (message.id !== assistantId && message.id !== optimisticAssistantId) {
+                return message;
+              }
+              const execution = message.teamExecution;
+              if (!execution) return message;
+              return {
+                ...message,
+                teamExecution: {
+                  ...execution,
+                  handoffs: execution.handoffs.map((handoff) =>
+                    handoff.id === streamEvent.handoffId
+                      ? {
+                          ...handoff,
+                          status: "failed",
+                          resultSummary: streamEvent.message,
+                          durationMs: streamEvent.durationMs,
+                        }
+                      : handoff,
+                  ),
+                },
+              };
+            }),
+          );
+          return;
+        }
+
+        if (streamEvent.type === "consolidation_started") {
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantId || message.id === optimisticAssistantId
+                ? {
+                    ...message,
+                    teamExecution: message.teamExecution
+                      ? { ...message.teamExecution, status: "consolidating" }
+                      : null,
+                  }
+                : message,
+            ),
+          );
+          return;
+        }
+
         if (streamEvent.type === "delta") {
           setMessages((current) =>
             current.map((message) =>
@@ -398,6 +568,23 @@ export function ChatWorkspace({
             estimatedCost: streamEvent.estimatedCost,
             currency: streamEvent.currency,
           }));
+          setMessages((current) =>
+            current.map((message) =>
+              (message.id === assistantId || message.id === optimisticAssistantId) &&
+              message.teamExecution
+                ? {
+                    ...message,
+                    teamExecution: {
+                      ...message.teamExecution,
+                      totalInputTokens: streamEvent.inputTokens,
+                      totalOutputTokens: streamEvent.outputTokens,
+                      totalEstimatedCost: streamEvent.estimatedCost,
+                      currency: streamEvent.currency,
+                    },
+                  }
+                : message,
+            ),
+          );
           return;
         }
 
@@ -411,6 +598,17 @@ export function ChatWorkspace({
                     status: "completed",
                     completed_at: new Date().toISOString(),
                     pending: false,
+                    teamExecution: message.teamExecution
+                      ? {
+                          ...message.teamExecution,
+                          status: message.teamExecution.handoffs.some(
+                            (handoff) => handoff.status === "failed",
+                          )
+                            ? "partial"
+                            : "completed",
+                          durationMs: streamEvent.durationMs,
+                        }
+                      : null,
                   }
                 : message,
             ),
@@ -450,6 +648,12 @@ export function ChatWorkspace({
                 error_message: message,
                 completed_at: new Date().toISOString(),
                 pending: false,
+                teamExecution: item.teamExecution
+                  ? {
+                      ...item.teamExecution,
+                      status: cancelled ? "cancelled" : "failed",
+                    }
+                  : null,
               }
             : item,
         ),
@@ -486,7 +690,14 @@ export function ChatWorkspace({
             <div className="grid gap-2 sm:grid-cols-2 lg:w-[34rem]">
               <select
                 value={mode}
-                onChange={(event) => setMode(event.target.value as ConversationMode)}
+                onChange={(event) => {
+                  const nextMode = event.target.value as ConversationMode;
+                  setMode(nextMode);
+                  if (nextMode === "team") {
+                    const leader = agents.find((agent) => agent.isLead);
+                    if (leader) setAgentId(leader.id);
+                  }
+                }}
                 disabled={isStreaming}
                 className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground"
               >
@@ -508,8 +719,8 @@ export function ChatWorkspace({
               <select
                 value={agentId}
                 onChange={(event) => setAgentId(event.target.value)}
-                disabled={isStreaming}
-                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground"
+                disabled={isStreaming || mode === "team"}
+                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {agents.map((agent) => (
                   <option key={agent.id} value={agent.id}>
@@ -536,7 +747,7 @@ export function ChatWorkspace({
           {mode === "team" && (
             <div className="mt-3 flex items-start gap-2 rounded-lg border border-primary/10 bg-primary/[0.035] px-3 py-2 text-[0.68rem] leading-5 text-primary/65">
               <Users className="mt-0.5 size-3.5 shrink-0" />
-              El líder responde con el contexto del equipo. Este bloque no simula handoffs ni llamadas ocultas entre agentes.
+              El líder creará un plan, delegará hasta tres subtareas reales y consolidará los resultados. Cada handoff quedará visible y registrado.
             </div>
           )}
         </header>
@@ -598,10 +809,18 @@ export function ChatWorkspace({
                       )}
                     </div>
                   )}
-                  <div className="whitespace-pre-wrap break-words text-sm leading-7">
-                    {message.content ||
-                      (message.status === "streaming" ? "Preparando respuesta..." : "Sin contenido")}
-                  </div>
+                  {userMessage ? (
+                    <div className="whitespace-pre-wrap break-words text-sm leading-7">
+                      {message.content || "Sin contenido"}
+                    </div>
+                  ) : (
+                    <MessageMarkdown
+                      content={
+                        message.content ||
+                        (message.status === "streaming" ? "Preparando respuesta..." : "Sin contenido")
+                      }
+                    />
+                  )}
                   {message.attachments.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {message.attachments.map((attachment) => (
@@ -635,6 +854,111 @@ export function ChatWorkspace({
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </details>
+                  )}
+                  {message.teamExecution && (
+                    <details
+                      className="mt-3 rounded-xl border border-cyan-300/10 bg-cyan-300/[0.025] px-3 py-2.5"
+                      open={message.pending ? true : undefined}
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-medium text-cyan-200/75">
+                        <span className="flex items-center gap-2">
+                          <Workflow className="size-3.5" />
+                          {message.teamExecution.status === "planning"
+                            ? "Orquestador preparando el plan"
+                            : message.teamExecution.status === "delegating"
+                              ? "Handoffs del equipo en curso"
+                              : message.teamExecution.status === "consolidating"
+                                ? "El líder está consolidando"
+                                : `${message.teamExecution.handoffs.length} handoff${message.teamExecution.handoffs.length === 1 ? "" : "s"} registrado${message.teamExecution.handoffs.length === 1 ? "" : "s"}`}
+                        </span>
+                        <span className="text-[0.6rem] uppercase tracking-[0.16em] text-slate-600">
+                          {message.teamExecution.status}
+                        </span>
+                      </summary>
+
+                      <div className="mt-3 space-y-3">
+                        <div className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2 text-xs leading-5 text-slate-500">
+                          <div className="font-medium text-slate-300">Plan operativo</div>
+                          <div className="mt-1">{message.teamExecution.summary}</div>
+                          {message.teamExecution.generatedBy && (
+                            <div className="mt-1 text-[0.6rem] text-slate-700">
+                              {message.teamExecution.generatedBy === "orchestrator"
+                                ? "Plan generado por el orquestador"
+                                : "Plan determinista de respaldo"}
+                            </div>
+                          )}
+                        </div>
+
+                        {message.teamExecution.handoffs.map((handoff) => (
+                          <div
+                            key={handoff.id}
+                            className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2.5"
+                          >
+                            <div className="flex flex-wrap items-center gap-2 text-xs">
+                              <span className="font-medium text-slate-400">
+                                {handoff.sourceAgent?.name ?? "Orquestador"}
+                              </span>
+                              <ArrowRight className="size-3 text-slate-700" />
+                              <span
+                                className="font-medium"
+                                style={{ color: handoff.targetAgent?.color ?? "#55e6c1" }}
+                              >
+                                {handoff.targetAgent?.name ?? "Especialista"}
+                              </span>
+                              {handoff.status === "running" && (
+                                <LoaderCircle className="size-3 animate-spin text-primary" />
+                              )}
+                              {handoff.status === "completed" && (
+                                <CheckCircle2 className="size-3 text-emerald-300/70" />
+                              )}
+                              {handoff.status === "failed" && (
+                                <TriangleAlert className="size-3 text-rose-300/70" />
+                              )}
+                            </div>
+                            <div className="mt-1.5 text-[0.68rem] leading-5 text-slate-600">
+                              {handoff.reason}
+                            </div>
+                            {handoff.resultSummary && (
+                              <div className="mt-2 rounded-md border border-white/[0.04] bg-black/10 px-2.5 py-2 text-slate-500">
+                                <MessageMarkdown content={handoff.resultSummary} compact />
+                              </div>
+                            )}
+                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.58rem] text-slate-700">
+                              {handoff.model && (
+                                <span>
+                                  {handoff.model.providerName} · {handoff.model.displayName}
+                                </span>
+                              )}
+                              {handoff.durationMs !== null && (
+                                <span>{formatDuration(handoff.durationMs)}</span>
+                              )}
+                              {handoff.estimatedCost !== null && (
+                                <span>{formatCost(handoff.estimatedCost, handoff.currency)}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {(message.teamExecution.totalInputTokens !== null ||
+                          message.teamExecution.durationMs !== null) && (
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-white/[0.05] pt-2 text-[0.62rem] text-slate-600">
+                            <span>
+                              Entrada total: {message.teamExecution.totalInputTokens ?? "—"}
+                            </span>
+                            <span>
+                              Salida total: {message.teamExecution.totalOutputTokens ?? "—"}
+                            </span>
+                            <span>
+                              {formatCost(
+                                message.teamExecution.totalEstimatedCost,
+                                message.teamExecution.currency,
+                              )}
+                            </span>
+                            <span>{formatDuration(message.teamExecution.durationMs)}</span>
+                          </div>
+                        )}
                       </div>
                     </details>
                   )}

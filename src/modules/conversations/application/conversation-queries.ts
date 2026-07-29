@@ -1,6 +1,7 @@
 import type { CurrentWorkspaceContext } from "@/modules/workspaces/application/require-current-workspace";
 import type {
   ConversationAgent,
+  ConversationHandoffRecord,
   ConversationMessageRecord,
   ConversationModel,
   ConversationRecord,
@@ -321,7 +322,7 @@ export async function loadConversationMessages(
   workspaceId: string,
   conversationId: string,
 ): Promise<ConversationMessageRecord[]> {
-  const [messagesResult, retrievalResult] = await Promise.all([
+  const [messagesResult, retrievalResult, executionResult] = await Promise.all([
     supabase
       .from("messages")
       .select(
@@ -338,13 +339,109 @@ export async function loadConversationMessages(
       .eq("conversation_id", conversationId)
       .not("message_id", "is", null)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("team_executions")
+      .select(
+        "id, assistant_message_id, status, plan, specialist_count, total_input_tokens, total_output_tokens, total_estimated_cost, currency, duration_ms",
+      )
+      .eq("workspace_id", workspaceId)
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (messagesResult.error) {
     throw new Error(`No pudimos consultar los mensajes: ${messagesResult.error.message}`);
   }
+  if (executionResult.error) {
+    throw new Error(
+      `No pudimos consultar las ejecuciones del equipo: ${executionResult.error.message}`,
+    );
+  }
 
-  const sourcesByMessage = new Map<string, ConversationMessageRecord["retrievalSources"]>();
+  const executionRows = (executionResult.data ?? []) as unknown as Array<
+    Record<string, unknown>
+  >;
+  const executionIds = executionRows.map((row) => String(row.id));
+  const handoffResult = executionIds.length
+    ? await supabase
+        .from("agent_handoffs")
+        .select(
+          "id, team_execution_id, sequence_number, status, reason, result_received, source_agent_id, target_agent_id, model_id, input_tokens, output_tokens, estimated_cost, currency, duration_ms",
+        )
+        .eq("workspace_id", workspaceId)
+        .in("team_execution_id", executionIds)
+        .order("sequence_number", { ascending: true })
+    : { data: [], error: null };
+
+  if (handoffResult.error) {
+    throw new Error(
+      `No pudimos consultar los handoffs del equipo: ${handoffResult.error.message}`,
+    );
+  }
+
+  const handoffRows = (handoffResult.data ?? []) as unknown as Array<
+    Record<string, unknown>
+  >;
+  const agentIds = [
+    ...new Set(
+      handoffRows.flatMap((row) =>
+        [row.source_agent_id, row.target_agent_id]
+          .filter(Boolean)
+          .map((value) => String(value)),
+      ),
+    ),
+  ];
+  const modelIds = [
+    ...new Set(
+      handoffRows
+        .map((row) => (row.model_id ? String(row.model_id) : null))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+
+  const [teamAgentsResult, teamModelsResult] = await Promise.all([
+    agentIds.length
+      ? supabase
+          .from("agents")
+          .select("id, name, role, color")
+          .eq("workspace_id", workspaceId)
+          .in("id", agentIds)
+      : Promise.resolve({ data: [], error: null }),
+    modelIds.length
+      ? supabase
+          .from("ai_models")
+          .select("id, display_name, provider_id")
+          .eq("workspace_id", workspaceId)
+          .in("id", modelIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (teamAgentsResult.error || teamModelsResult.error) {
+    throw new Error("No pudimos completar los detalles de la colaboración del equipo.");
+  }
+
+  const teamModelRows = (teamModelsResult.data ?? []) as unknown as Array<
+    Record<string, unknown>
+  >;
+  const providerIds = [
+    ...new Set(
+      teamModelRows
+        .map((row) => (row.provider_id ? String(row.provider_id) : null))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+  const providerResult = providerIds.length
+    ? await supabase
+        .from("ai_providers")
+        .select("id, display_name")
+        .eq("workspace_id", workspaceId)
+        .in("id", providerIds)
+    : { data: [], error: null };
+
+  const sourcesByMessage = new Map<
+    string,
+    ConversationMessageRecord["retrievalSources"]
+  >();
   for (const item of retrievalResult.data ?? []) {
     const sources = Array.isArray(item.sources) ? item.sources : [];
     sourcesByMessage.set(
@@ -353,30 +450,137 @@ export async function loadConversationMessages(
         const record = recordOf(source);
         const sourceType = String(record.sourceType);
         if (sourceType !== "document_chunk" && sourceType !== "memory") return [];
-        return [{
-          sourceType,
-          sourceId: String(record.sourceId),
-          title: String(record.title),
-          score: Number(record.score ?? 0),
-          documentId: record.documentId ? String(record.documentId) : null,
-          fileName: record.fileName ? String(record.fileName) : null,
-          chunkIndex:
-            typeof record.chunkIndex === "number" ? record.chunkIndex : null,
-        } satisfies ConversationMessageRecord["retrievalSources"][number]];
+        return [
+          {
+            sourceType,
+            sourceId: String(record.sourceId),
+            title: String(record.title),
+            score: Number(record.score ?? 0),
+            documentId: record.documentId ? String(record.documentId) : null,
+            fileName: record.fileName ? String(record.fileName) : null,
+            chunkIndex:
+              typeof record.chunkIndex === "number" ? record.chunkIndex : null,
+          } satisfies ConversationMessageRecord["retrievalSources"][number],
+        ];
       }),
     );
   }
 
+  const teamAgentsById = new Map(
+    ((teamAgentsResult.data ?? []) as unknown as Array<Record<string, unknown>>).map(
+      (row) => [String(row.id), row],
+    ),
+  );
+  const teamModelsById = new Map(
+    teamModelRows.map((row) => [String(row.id), row]),
+  );
+  const providersById = new Map(
+    ((providerResult.data ?? []) as unknown as Array<Record<string, unknown>>).map(
+      (row) => [String(row.id), row],
+    ),
+  );
+  const handoffsByExecution = new Map<string, ConversationHandoffRecord[]>();
+
+  for (const row of handoffRows) {
+    const executionId = String(row.team_execution_id);
+    const source = row.source_agent_id
+      ? teamAgentsById.get(String(row.source_agent_id))
+      : null;
+    const target = row.target_agent_id
+      ? teamAgentsById.get(String(row.target_agent_id))
+      : null;
+    const model = row.model_id ? teamModelsById.get(String(row.model_id)) : null;
+    const provider = model?.provider_id
+      ? providersById.get(String(model.provider_id))
+      : null;
+    const current = handoffsByExecution.get(executionId) ?? [];
+    current.push({
+      id: String(row.id),
+      sequenceNumber: Number(row.sequence_number),
+      status: row.status as ConversationHandoffRecord["status"],
+      reason: String(row.reason ?? ""),
+      resultSummary: String(row.result_received ?? "").replace(/\s+/g, " ").slice(0, 360),
+      sourceAgent: source
+        ? {
+            id: String(source.id),
+            name: String(source.name),
+            role: source.role as ConversationAgent["role"],
+            color: String(source.color),
+          }
+        : null,
+      targetAgent: target
+        ? {
+            id: String(target.id),
+            name: String(target.name),
+            role: target.role as ConversationAgent["role"],
+            color: String(target.color),
+          }
+        : null,
+      model: model
+        ? {
+            id: String(model.id),
+            displayName: String(model.display_name),
+            providerName: provider ? String(provider.display_name) : "Proveedor",
+          }
+        : null,
+      inputTokens: row.input_tokens === null ? null : Number(row.input_tokens),
+      outputTokens: row.output_tokens === null ? null : Number(row.output_tokens),
+      estimatedCost:
+        row.estimated_cost === null ? null : Number(row.estimated_cost),
+      currency: String(row.currency ?? "USD"),
+      durationMs: row.duration_ms === null ? null : Number(row.duration_ms),
+    });
+    handoffsByExecution.set(executionId, current);
+  }
+
+  const teamExecutionByMessage = new Map<
+    string,
+    NonNullable<ConversationMessageRecord["teamExecution"]>
+  >();
+  for (const row of executionRows) {
+    if (!row.assistant_message_id) continue;
+    const plan = recordOf(row.plan);
+    teamExecutionByMessage.set(String(row.assistant_message_id), {
+      id: String(row.id),
+      status: row.status as NonNullable<
+        ConversationMessageRecord["teamExecution"]
+      >["status"],
+      summary: typeof plan.summary === "string" ? plan.summary : "",
+      generatedBy:
+        plan.generatedBy === "orchestrator" || plan.generatedBy === "fallback"
+          ? plan.generatedBy
+          : null,
+      specialistCount: Number(row.specialist_count ?? 0),
+      totalInputTokens:
+        row.total_input_tokens === null ? null : Number(row.total_input_tokens),
+      totalOutputTokens:
+        row.total_output_tokens === null ? null : Number(row.total_output_tokens),
+      totalEstimatedCost:
+        row.total_estimated_cost === null
+          ? null
+          : Number(row.total_estimated_cost),
+      currency: String(row.currency ?? "USD"),
+      durationMs: row.duration_ms === null ? null : Number(row.duration_ms),
+      handoffs: handoffsByExecution.get(String(row.id)) ?? [],
+    });
+  }
+
   return ((messagesResult.data ?? []) as unknown as Array<Record<string, unknown>>).map((row) => {
     const agent = firstRelation(
-      row.agents as ConversationMessageRecord["agent"] | ConversationMessageRecord["agent"][] | null,
+      row.agents as
+        | ConversationMessageRecord["agent"]
+        | ConversationMessageRecord["agent"][]
+        | null,
     );
     const modelRaw = firstRelation(
       row.ai_models as Record<string, unknown> | Record<string, unknown>[] | null,
     );
     const providerRaw = modelRaw
       ? firstRelation(
-          modelRaw.ai_providers as Record<string, unknown> | Record<string, unknown>[] | null,
+          modelRaw.ai_providers as
+            | Record<string, unknown>
+            | Record<string, unknown>[]
+            | null,
         )
       : null;
     const attachments = Array.isArray(row.message_attachments)
@@ -400,7 +604,9 @@ export async function loadConversationMessages(
         ? {
             id: String(modelRaw.id),
             displayName: String(modelRaw.display_name),
-            providerName: providerRaw ? String(providerRaw.display_name) : "Proveedor",
+            providerName: providerRaw
+              ? String(providerRaw.display_name)
+              : "Proveedor",
           }
         : null,
       attachments: attachments.map((attachment) => {
@@ -414,6 +620,7 @@ export async function loadConversationMessages(
         };
       }),
       retrievalSources: sourcesByMessage.get(id) ?? [],
+      teamExecution: teamExecutionByMessage.get(id) ?? null,
     };
   });
 }

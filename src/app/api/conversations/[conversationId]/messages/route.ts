@@ -14,6 +14,7 @@ import {
   limitConversationHistory,
 } from "@/modules/conversations/application/prompt-builder";
 import { estimateModelCost } from "@/modules/conversations/application/usage";
+import { executeTeamOrchestration } from "@/modules/orchestration/application/execute-team-orchestration";
 import { detectSensitiveAttachment } from "@/modules/conversations/domain/attachment-security";
 import type {
   ChatAttachmentInput,
@@ -440,14 +441,41 @@ export async function POST(request: NextRequest, context: RouteContext) {
     },
   );
 
-  const agent =
+  const selectedAgent =
     team.find((item) => item.id === payload.agentId) ??
     team.find((item) => item.id === conversation.selected_agent_id) ??
-    team.find((item) => item.isLead) ??
     team[0];
+  const leaderAgent = team.find((item) => item.isLead) ?? selectedAgent;
+  const agent = payload.mode === "team" ? leaderAgent : selectedAgent;
   if (!agent) {
     return jsonError(
       "Asigna al menos un agente activo al proyecto antes de conversar.",
+      409,
+    );
+  }
+  let executionTeam = team;
+  if (payload.mode === "team") {
+    const { data: collaboratorRows } = await supabase
+      .from("agent_collaborators")
+      .select("target_agent_id")
+      .eq("workspace_id", membership.workspace_id)
+      .eq("source_agent_id", agent.id)
+      .eq("enabled", true);
+    const configuredTargets = new Set(
+      (collaboratorRows ?? []).map((row) => String(row.target_agent_id)),
+    );
+    if (configuredTargets.size > 0) {
+      executionTeam = team.filter(
+        (member) => member.id === agent.id || configuredTargets.has(member.id),
+      );
+    }
+  }
+  if (
+    payload.mode === "team" &&
+    executionTeam.filter((item) => item.id !== agent.id).length === 0
+  ) {
+    return jsonError(
+      "El líder no tiene especialistas habilitados para colaborar en este proyecto.",
       409,
     );
   }
@@ -516,19 +544,29 @@ export async function POST(request: NextRequest, context: RouteContext) {
     limit: 8,
   });
   const retrievedSources = compactRetrievalSources(retrieval.sources);
+  const renderedRetrievedContext = renderRetrievedContext(retrieval.sources);
+  const projectContext = {
+    name: project.name,
+    description: project.description,
+    permanentInstructions: project.permanent_instructions,
+    rules: project.project_rules,
+    conventions: project.conventions,
+    technologies: technologyNames,
+    retrievedContext: renderedRetrievedContext,
+  };
   const systemPrompt = buildConversationSystemPrompt({
     project: {
-      name: project.name,
-      description: project.description,
-      permanentInstructions: project.permanent_instructions,
-      rules: project.project_rules,
-      conventions: project.conventions,
-      technologies: technologyNames,
+      name: projectContext.name,
+      description: projectContext.description,
+      permanentInstructions: projectContext.permanentInstructions,
+      rules: projectContext.rules,
+      conventions: projectContext.conventions,
+      technologies: projectContext.technologies,
     },
     agent,
-    mode: payload.mode,
+    mode: "individual",
     teamMembers: team,
-    retrievedContext: renderRetrievedContext(retrieval.sources),
+    retrievedContext: projectContext.retrievedContext,
   });
   const currentUserContent = appendAttachmentsToUserMessage(
     payload.content,
@@ -767,6 +805,20 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ),
   ]);
 
+  if (payload.mode === "team") {
+    await supabase.from("conversation_participants").upsert(
+      team.map((member) => ({
+        conversation_id: conversation.id,
+        workspace_id: membership.workspace_id,
+        agent_id: member.id,
+        participant_role: member.id === agent.id ? "lead" : "specialist",
+        status: "active",
+        added_by: user.id,
+      })),
+      { onConflict: "conversation_id,agent_id" },
+    );
+  }
+
   const providerMessages = buildProviderMessages({
     systemPrompt,
     history,
@@ -796,6 +848,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         type: "meta",
         assistantMessageId: assistantMessage.id,
         runId: run.id,
+        teamExecutionId: null,
         model: {
           id: model.id,
           name: model.display_name,
@@ -806,84 +859,195 @@ export async function POST(request: NextRequest, context: RouteContext) {
       });
 
       try {
-        const result = await adapter.stream(
-          {
-            model: model.api_identifier,
-            messages: providerMessages,
-            maxOutputTokens: model.max_output_tokens
-              ? Math.min(model.max_output_tokens, 16_384)
-              : 8_192,
-            stream: true,
+        if (payload.mode === "team") {
+          const teamResult = await executeTeamOrchestration({
+            supabase,
+            workspaceId: membership.workspace_id,
+            projectId: project.id,
+            conversationId: conversation.id,
+            userMessageId: userMessage.id,
+            assistantMessageId: assistantMessage.id,
+            rootRunId: run.id,
+            userId: user.id,
+            taskType: payload.taskType,
+            userRequest: payload.content,
+            currentUserContent,
+            recentHistory: history,
+            project: projectContext,
+            leader: agent,
+            team: executionTeam,
+            model: {
+              id: model.id,
+              apiIdentifier: model.api_identifier,
+              displayName: model.display_name,
+              providerId: model.provider.id,
+              providerName: model.provider.display_name,
+              currency: model.currency,
+              inputCostPerMillion: model.input_cost_per_million,
+              outputCostPerMillion: model.output_cost_per_million,
+              maxOutputTokens: model.max_output_tokens,
+            },
+            adapter,
             signal: request.signal,
-          },
-          async (event) => {
-            if (event.type === "text_delta") {
-              accumulated += event.text;
-              safeEvent({ type: "delta", text: event.text });
-            }
-          },
-        );
+            emit: (event) => {
+              if (event.type === "delta") accumulated += event.text;
+              safeEvent(event);
+            },
+          });
 
-        const durationMs = Date.now() - startedAt;
-        const estimatedCost = estimateModelCost({
-          inputTokens: result.usage.inputTokens,
-          outputTokens: result.usage.outputTokens,
-          inputCostPerMillion: model.input_cost_per_million,
-          outputCostPerMillion: model.output_cost_per_million,
-        });
-        const completedAt = new Date().toISOString();
+          const finalCost = estimateModelCost({
+            inputTokens: teamResult.finalResponse.usage.inputTokens,
+            outputTokens: teamResult.finalResponse.usage.outputTokens,
+            inputCostPerMillion: model.input_cost_per_million,
+            outputCostPerMillion: model.output_cost_per_million,
+          });
+          const completedAt = new Date().toISOString();
 
-        await Promise.all([
-          supabase
-            .from("messages")
-            .update({
-              status: "completed",
-              content: result.content || accumulated,
-              completed_at: completedAt,
-              error_message: null,
-            })
-            .eq("id", assistantMessage.id),
-          supabase
-            .from("agent_runs")
-            .update({
-              status: "completed",
+          await Promise.all([
+            supabase
+              .from("messages")
+              .update({
+                status: "completed",
+                content: teamResult.content || accumulated,
+                completed_at: completedAt,
+                error_message: null,
+              })
+              .eq("id", assistantMessage.id),
+            supabase
+              .from("agent_runs")
+              .update({
+                status: "completed",
+                input_tokens: teamResult.finalResponse.usage.inputTokens,
+                output_tokens: teamResult.finalResponse.usage.outputTokens,
+                estimated_cost: finalCost,
+                currency: model.currency,
+                completed_at: completedAt,
+                duration_ms: teamResult.finalDurationMs,
+                output_content: teamResult.content || accumulated,
+                output_summary: (teamResult.content || accumulated).slice(0, 4000),
+                metadata: {
+                  attachment_count: payload.attachments.length,
+                  selected_manually: Boolean(payload.modelId),
+                  retrieval_mode: retrieval.mode,
+                  retrieval_count: retrieval.sources.length,
+                  retrieval_latency_ms: retrieval.latencyMs,
+                  team_execution_id: teamResult.executionId,
+                  completed_handoffs: teamResult.completedHandoffs,
+                  failed_handoffs: teamResult.failedHandoffs,
+                },
+              })
+              .eq("id", run.id),
+            supabase.from("model_usage").insert({
+              workspace_id: membership.workspace_id,
+              project_id: project.id,
+              conversation_id: conversation.id,
+              run_id: run.id,
+              provider_id: model.provider.id,
+              model_id: model.id,
+              input_tokens: teamResult.finalResponse.usage.inputTokens,
+              output_tokens: teamResult.finalResponse.usage.outputTokens,
+              total_tokens: teamResult.finalResponse.usage.totalTokens,
+              estimated_cost: finalCost,
+              currency: model.currency,
+              duration_ms: teamResult.finalDurationMs,
+              created_by: user.id,
+            }),
+          ]);
+
+          safeEvent({
+            type: "usage",
+            inputTokens: teamResult.totalInputTokens,
+            outputTokens: teamResult.totalOutputTokens,
+            estimatedCost: teamResult.totalEstimatedCost,
+            currency: teamResult.currency,
+          });
+          safeEvent({
+            type: "completed",
+            finishReason: teamResult.finishReason,
+            durationMs: teamResult.durationMs,
+          });
+        } else {
+          const result = await adapter.stream(
+            {
+              model: model.api_identifier,
+              messages: providerMessages,
+              maxOutputTokens: model.max_output_tokens
+                ? Math.min(model.max_output_tokens, 16_384)
+                : 8_192,
+              stream: true,
+              signal: request.signal,
+            },
+            async (event) => {
+              if (event.type === "text_delta") {
+                accumulated += event.text;
+                safeEvent({ type: "delta", text: event.text });
+              }
+            },
+          );
+
+          const durationMs = Date.now() - startedAt;
+          const estimatedCost = estimateModelCost({
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
+            inputCostPerMillion: model.input_cost_per_million,
+            outputCostPerMillion: model.output_cost_per_million,
+          });
+          const completedAt = new Date().toISOString();
+
+          await Promise.all([
+            supabase
+              .from("messages")
+              .update({
+                status: "completed",
+                content: result.content || accumulated,
+                completed_at: completedAt,
+                error_message: null,
+              })
+              .eq("id", assistantMessage.id),
+            supabase
+              .from("agent_runs")
+              .update({
+                status: "completed",
+                input_tokens: result.usage.inputTokens,
+                output_tokens: result.usage.outputTokens,
+                estimated_cost: estimatedCost,
+                currency: model.currency,
+                completed_at: completedAt,
+                duration_ms: durationMs,
+                output_content: result.content || accumulated,
+                output_summary: (result.content || accumulated).slice(0, 4000),
+              })
+              .eq("id", run.id),
+            supabase.from("model_usage").insert({
+              workspace_id: membership.workspace_id,
+              project_id: project.id,
+              conversation_id: conversation.id,
+              run_id: run.id,
+              provider_id: model.provider.id,
+              model_id: model.id,
               input_tokens: result.usage.inputTokens,
               output_tokens: result.usage.outputTokens,
+              total_tokens: result.usage.totalTokens,
               estimated_cost: estimatedCost,
               currency: model.currency,
-              completed_at: completedAt,
               duration_ms: durationMs,
-            })
-            .eq("id", run.id),
-          supabase.from("model_usage").insert({
-            workspace_id: membership.workspace_id,
-            project_id: project.id,
-            conversation_id: conversation.id,
-            run_id: run.id,
-            provider_id: model.provider.id,
-            model_id: model.id,
-            input_tokens: result.usage.inputTokens,
-            output_tokens: result.usage.outputTokens,
-            total_tokens: result.usage.totalTokens,
-            estimated_cost: estimatedCost,
-            currency: model.currency,
-            duration_ms: durationMs,
-            created_by: user.id,
-          }),
-        ]);
+              created_by: user.id,
+            }),
+          ]);
 
-        safeEvent({
-          type: "usage",
-          inputTokens: result.usage.inputTokens,
-          outputTokens: result.usage.outputTokens,
-          estimatedCost,
-          currency: model.currency,
-        });
-        safeEvent({
-          type: "completed",
-          finishReason: result.finishReason,
-          durationMs,
-        });
+          safeEvent({
+            type: "usage",
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
+            estimatedCost,
+            currency: model.currency,
+          });
+          safeEvent({
+            type: "completed",
+            finishReason: result.finishReason,
+            durationMs,
+          });
+        }
       } catch (error) {
         const requestError = error instanceof ProviderRequestError ? error : null;
         const cancelled = requestError?.code === "cancelled" || request.signal.aborted;
@@ -911,6 +1075,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
               error_message: message,
               completed_at: completedAt,
               duration_ms: durationMs,
+              output_content: accumulated,
+              output_summary: accumulated.slice(0, 4000),
             })
             .eq("id", run.id),
         ]);

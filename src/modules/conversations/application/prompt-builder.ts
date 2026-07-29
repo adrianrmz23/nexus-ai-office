@@ -29,7 +29,7 @@ export function buildConversationSystemPrompt(input: {
     : "\nMEMORIA RECUPERADA\nNo se recuperaron memorias adicionales para esta solicitud.";
   const teamSection =
     mode === "team"
-      ? `\nMODO EQUIPO COORDINADO\nEsta ejecución la realiza el agente líder ${agent.name}. Considera las especialidades del equipo asignado y consolida una respuesta única. No afirmes que otros agentes ejecutaron llamadas independientes. Equipo disponible: ${teamMembers
+      ? `\nMODO EQUIPO COORDINADO\nEsta ejecución es coordinada por ${agent.name}. Los especialistas seleccionados pueden producir contribuciones independientes que después serán consolidadas y registradas como handoffs observables. No inventes participación de agentes que no hayan sido ejecutados. Equipo disponible: ${teamMembers
           .map((member) => `${member.name} (${member.role})`)
           .join(", ") || "sin especialistas adicionales"}.`
       : "";

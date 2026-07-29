@@ -104,6 +104,44 @@ export type ConversationRetrievedSource = {
   chunkIndex: number | null;
 };
 
+
+export type ConversationTeamAgent = {
+  id: string;
+  name: string;
+  role: AgentRole;
+  color: string;
+};
+
+export type ConversationHandoffRecord = {
+  id: string;
+  sequenceNumber: number;
+  status: "pending" | "running" | "completed" | "failed" | "cancelled" | "skipped";
+  reason: string;
+  resultSummary: string;
+  sourceAgent: ConversationTeamAgent | null;
+  targetAgent: ConversationTeamAgent | null;
+  model: { id: string; displayName: string; providerName: string } | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  estimatedCost: number | null;
+  currency: string;
+  durationMs: number | null;
+};
+
+export type ConversationTeamExecution = {
+  id: string;
+  status: "planning" | "delegating" | "consolidating" | "completed" | "partial" | "failed" | "cancelled";
+  summary: string;
+  generatedBy: "orchestrator" | "fallback" | null;
+  specialistCount: number;
+  totalInputTokens: number | null;
+  totalOutputTokens: number | null;
+  totalEstimatedCost: number | null;
+  currency: string;
+  durationMs: number | null;
+  handoffs: ConversationHandoffRecord[];
+};
+
 export type ConversationMessageRecord = {
   id: string;
   conversation_id: string;
@@ -123,6 +161,7 @@ export type ConversationMessageRecord = {
   } | null;
   attachments: MessageAttachmentRecord[];
   retrievalSources: ConversationRetrievedSource[];
+  teamExecution: ConversationTeamExecution | null;
 };
 
 export type ChatAttachmentInput = {
@@ -147,6 +186,7 @@ export type ChatStreamEvent =
       type: "meta";
       assistantMessageId: string;
       runId: string;
+      teamExecutionId?: string | null;
       model: {
         id: string;
         name: string;
@@ -158,6 +198,46 @@ export type ChatStreamEvent =
       };
       sources: ConversationRetrievedSource[];
     }
+  | {
+      type: "team_plan";
+      executionId: string;
+      summary: string;
+      generatedBy: "orchestrator" | "fallback";
+      steps: Array<{
+        agent: ConversationTeamAgent;
+        objective: string;
+        reason: string;
+      }>;
+    }
+  | {
+      type: "handoff_started";
+      executionId: string;
+      handoffId: string;
+      sequenceNumber: number;
+      sourceAgent: ConversationTeamAgent;
+      targetAgent: ConversationTeamAgent;
+      objective: string;
+      model: { id: string; displayName: string; providerName: string };
+    }
+  | {
+      type: "handoff_completed";
+      executionId: string;
+      handoffId: string;
+      resultSummary: string;
+      inputTokens: number | null;
+      outputTokens: number | null;
+      estimatedCost: number | null;
+      currency: string;
+      durationMs: number;
+    }
+  | {
+      type: "handoff_failed";
+      executionId: string;
+      handoffId: string;
+      message: string;
+      durationMs: number;
+    }
+  | { type: "consolidation_started"; executionId: string }
   | { type: "delta"; text: string }
   | {
       type: "usage";

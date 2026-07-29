@@ -13,6 +13,7 @@ import {
   Layers3,
   MessageSquareText,
   ShieldCheck,
+  Workflow,
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -87,6 +88,8 @@ export default async function AppDashboardPage() {
     projectAgentCountResult,
     conversationCountResult,
     completedRunCountResult,
+    teamExecutionCountResult,
+    completedHandoffCountResult,
   ] = await Promise.all([
     supabase
       .from("technologies")
@@ -140,6 +143,16 @@ export default async function AppDashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
       .eq("status", "completed"),
+    supabase
+      .from("team_executions")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .in("status", ["completed", "partial"]),
+    supabase
+      .from("agent_handoffs")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "completed"),
   ]);
 
   const technologyCount = technologyCountResult.count ?? 0;
@@ -153,6 +166,8 @@ export default async function AppDashboardPage() {
   const projectAgentCount = projectAgentCountResult.count ?? 0;
   const conversationCount = conversationCountResult.count ?? 0;
   const completedRunCount = completedRunCountResult.count ?? 0;
+  const teamExecutionCount = teamExecutionCountResult.count ?? 0;
+  const completedHandoffCount = completedHandoffCountResult.count ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
@@ -164,8 +179,8 @@ export default async function AppDashboardPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
             La base segura, los proyectos, agentes y modelos ya ejecutan conversaciones reales.
-            Cada respuesta conserva historial, modelo, tokens, costo, duración y contexto aislado
-            por proyecto.
+            El modo equipo delega subtareas verificables, registra handoffs y conserva historial,
+            modelos, costos, duración y contexto aislado por proyecto.
           </p>
         </div>
 
@@ -182,7 +197,7 @@ export default async function AppDashboardPage() {
         </div>
       </div>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {[
           {
             label: "Tecnologías",
@@ -213,6 +228,12 @@ export default async function AppDashboardPage() {
             value: conversationCount,
             detail: `${completedRunCount} ejecuciones completadas`,
             icon: MessageSquareText,
+          },
+          {
+            label: "Handoffs",
+            value: completedHandoffCount,
+            detail: `${teamExecutionCount} ejecuciones de equipo`,
+            icon: Workflow,
           },
         ].map((item) => (
           <article key={item.label} className="nexus-panel rounded-2xl p-5">
