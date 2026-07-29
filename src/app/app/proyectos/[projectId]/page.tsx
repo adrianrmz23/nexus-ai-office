@@ -6,6 +6,7 @@ import {
   Archive,
   ArrowLeft,
   Bot,
+  BrainCircuit,
   ArrowUpRight,
   CirclePause,
   Edit3,
@@ -424,6 +425,13 @@ export default async function ProjectDetailPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/app/memoria?project=${project.id}`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <BrainCircuit />
+              Gestionar memoria
+            </Link>
             {assignedAgents.length > 0 && (
               <Link
                 href={`/app/conversaciones/nueva?project=${project.id}`}
@@ -504,8 +512,7 @@ export default async function ProjectDetailPage({
           Instrucciones permanentes del proyecto
         </h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-          Estos bloques serán incorporados de forma controlada cuando habilitemos
-          agentes, conversaciones y memoria semántica.
+          Estas reglas se combinan con los documentos y memorias recuperados de forma verificable en cada conversación.
         </p>
         <div className="mt-5 grid gap-3 xl:grid-cols-3">
           <ContextBlock

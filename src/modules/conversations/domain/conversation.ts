@@ -93,6 +93,17 @@ export type MessageAttachmentRecord = {
   language: string | null;
 };
 
+
+export type ConversationRetrievedSource = {
+  sourceType: "document_chunk" | "memory";
+  sourceId: string;
+  title: string;
+  score: number;
+  documentId: string | null;
+  fileName: string | null;
+  chunkIndex: number | null;
+};
+
 export type ConversationMessageRecord = {
   id: string;
   conversation_id: string;
@@ -111,6 +122,7 @@ export type ConversationMessageRecord = {
     providerName: string;
   } | null;
   attachments: MessageAttachmentRecord[];
+  retrievalSources: ConversationRetrievedSource[];
 };
 
 export type ChatAttachmentInput = {
@@ -144,6 +156,7 @@ export type ChatStreamEvent =
         id: string;
         name: string;
       };
+      sources: ConversationRetrievedSource[];
     }
   | { type: "delta"; text: string }
   | {

@@ -321,17 +321,53 @@ export async function loadConversationMessages(
   workspaceId: string,
   conversationId: string,
 ): Promise<ConversationMessageRecord[]> {
-  const { data } = await supabase
-    .from("messages")
-    .select(
-      "id, conversation_id, role, status, agent_id, model_id, content, error_message, created_at, completed_at, agents(id, name, role, icon, color), ai_models(id, display_name, ai_providers(display_name)), message_attachments(id, file_name, mime_type, size_bytes, language)",
-    )
-    .eq("workspace_id", workspaceId)
-    .eq("conversation_id", conversationId)
-    .order("sequence_number", { ascending: true })
-    .limit(300);
+  const [messagesResult, retrievalResult] = await Promise.all([
+    supabase
+      .from("messages")
+      .select(
+        "id, conversation_id, role, status, agent_id, model_id, content, error_message, created_at, completed_at, agents(id, name, role, icon, color), ai_models(id, display_name, ai_providers(display_name)), message_attachments(id, file_name, mime_type, size_bytes, language)",
+      )
+      .eq("workspace_id", workspaceId)
+      .eq("conversation_id", conversationId)
+      .order("sequence_number", { ascending: true })
+      .limit(300),
+    supabase
+      .from("memory_retrieval_logs")
+      .select("message_id, sources")
+      .eq("workspace_id", workspaceId)
+      .eq("conversation_id", conversationId)
+      .not("message_id", "is", null)
+      .order("created_at", { ascending: true }),
+  ]);
 
-  return ((data ?? []) as unknown as Array<Record<string, unknown>>).map((row) => {
+  if (messagesResult.error) {
+    throw new Error(`No pudimos consultar los mensajes: ${messagesResult.error.message}`);
+  }
+
+  const sourcesByMessage = new Map<string, ConversationMessageRecord["retrievalSources"]>();
+  for (const item of retrievalResult.data ?? []) {
+    const sources = Array.isArray(item.sources) ? item.sources : [];
+    sourcesByMessage.set(
+      String(item.message_id),
+      sources.flatMap((source: unknown) => {
+        const record = recordOf(source);
+        const sourceType = String(record.sourceType);
+        if (sourceType !== "document_chunk" && sourceType !== "memory") return [];
+        return [{
+          sourceType,
+          sourceId: String(record.sourceId),
+          title: String(record.title),
+          score: Number(record.score ?? 0),
+          documentId: record.documentId ? String(record.documentId) : null,
+          fileName: record.fileName ? String(record.fileName) : null,
+          chunkIndex:
+            typeof record.chunkIndex === "number" ? record.chunkIndex : null,
+        } satisfies ConversationMessageRecord["retrievalSources"][number]];
+      }),
+    );
+  }
+
+  return ((messagesResult.data ?? []) as unknown as Array<Record<string, unknown>>).map((row) => {
     const agent = firstRelation(
       row.agents as ConversationMessageRecord["agent"] | ConversationMessageRecord["agent"][] | null,
     );
@@ -346,9 +382,10 @@ export async function loadConversationMessages(
     const attachments = Array.isArray(row.message_attachments)
       ? row.message_attachments
       : [];
+    const id = String(row.id);
 
     return {
-      id: String(row.id),
+      id,
       conversation_id: String(row.conversation_id),
       role: row.role as ConversationMessageRecord["role"],
       status: row.status as ConversationMessageRecord["status"],
@@ -376,6 +413,7 @@ export async function loadConversationMessages(
           language: record.language ? String(record.language) : null,
         };
       }),
+      retrievalSources: sourcesByMessage.get(id) ?? [],
     };
   });
 }

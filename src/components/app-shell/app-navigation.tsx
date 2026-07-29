@@ -73,7 +73,8 @@ const navigation: NavigationItem[] = [
     label: "Memoria",
     href: "/app/memoria",
     icon: BrainCircuit,
-    enabled: false,
+    enabled: true,
+    mobileLabel: "Memoria",
   },
   {
     label: "Analítica",

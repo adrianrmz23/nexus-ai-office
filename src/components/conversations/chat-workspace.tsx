@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import {
   Bot,
+  BookOpenText,
   CircleStop,
   Clock3,
   Cpu,
@@ -282,6 +283,7 @@ export function ChatWorkspace({
           size_bytes: attachment.sizeBytes,
           language: attachment.language,
         })),
+        retrievalSources: [],
       },
       {
         id: optimisticAssistantId,
@@ -311,6 +313,7 @@ export function ChatWorkspace({
             }
           : null,
         attachments: [],
+        retrievalSources: [],
         pending: true,
       },
     ]);
@@ -368,6 +371,7 @@ export function ChatWorkspace({
                       displayName: streamEvent.model.name,
                       providerName: streamEvent.model.provider,
                     },
+                    retrievalSources: streamEvent.sources,
                   }
                 : message,
             ),
@@ -610,6 +614,29 @@ export function ChatWorkspace({
                         </span>
                       ))}
                     </div>
+                  )}
+                  {message.retrievalSources.length > 0 && (
+                    <details className="mt-3 rounded-xl border border-primary/10 bg-primary/[0.025] px-3 py-2.5">
+                      <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-primary/70">
+                        <BookOpenText className="size-3.5" />
+                        {message.retrievalSources.length} {message.retrievalSources.length === 1 ? "fuente utilizada" : "fuentes utilizadas"}
+                      </summary>
+                      <div className="mt-3 space-y-2">
+                        {message.retrievalSources.map((source) => (
+                          <div
+                            key={`${source.sourceType}-${source.sourceId}`}
+                            className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2 text-xs"
+                          >
+                            <div className="font-medium text-slate-300">{source.title}</div>
+                            <div className="mt-1 text-[0.62rem] text-slate-600">
+                              {source.fileName ?? (source.sourceType === "memory" ? "Memoria estructurada" : "Documento")}
+                              {source.chunkIndex !== null ? ` · fragmento ${source.chunkIndex + 1}` : ""}
+                              {` · ${Math.round(source.score * 100)}%`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   )}
                   {message.error_message && (
                     <div className="mt-3 rounded-lg border border-rose-400/15 bg-rose-400/[0.04] px-3 py-2 text-xs leading-5 text-rose-200/70">

@@ -32,6 +32,11 @@ import type {
   ModelTaskType,
 } from "@/modules/models/domain/model";
 import { recommendModels } from "@/modules/models/domain/model-recommender";
+import {
+  compactRetrievalSources,
+  renderRetrievedContext,
+  retrieveMemoryContext,
+} from "@/modules/memory/application/memory-retrieval";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -501,6 +506,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  const retrieval = await retrieveMemoryContext({
+    supabase,
+    workspaceId: membership.workspace_id,
+    projectId: project.id,
+    agentId: agent.id,
+    conversationId: conversation.id,
+    query: payload.content,
+    limit: 8,
+  });
+  const retrievedSources = compactRetrievalSources(retrieval.sources);
   const systemPrompt = buildConversationSystemPrompt({
     project: {
       name: project.name,
@@ -513,6 +528,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     agent,
     mode: payload.mode,
     teamMembers: team,
+    retrievedContext: renderRetrievedContext(retrieval.sources),
   });
   const currentUserContent = appendAttachmentsToUserMessage(
     payload.content,
@@ -702,6 +718,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       metadata: {
         attachment_count: payload.attachments.length,
         selected_manually: Boolean(payload.modelId),
+        retrieval_mode: retrieval.mode,
+        retrieval_count: retrieval.sources.length,
+        retrieval_latency_ms: retrieval.latencyMs,
       },
     })
     .select("id")
@@ -712,6 +731,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   await Promise.all([
+    supabase.from("memory_retrieval_logs").insert({
+      workspace_id: membership.workspace_id,
+      project_id: project.id,
+      conversation_id: conversation.id,
+      message_id: assistantMessage.id,
+      run_id: run.id,
+      query_text: payload.content,
+      retrieval_mode: retrieval.mode,
+      result_count: retrieval.sources.length,
+      latency_ms: retrieval.latencyMs,
+      sources: retrievedSources,
+      created_by: user.id,
+    }),
     supabase
       .from("conversations")
       .update({
@@ -770,6 +802,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
           provider: model.provider.display_name,
         },
         agent: { id: agent.id, name: agent.name },
+        sources: retrievedSources,
       });
 
       try {
