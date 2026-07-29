@@ -57,9 +57,10 @@ const navigation: NavigationItem[] = [
   },
   {
     label: "Conversaciones",
+    mobileLabel: "Chat",
     href: "/app/conversaciones",
     icon: MessageSquareText,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Tecnologías",
@@ -146,7 +147,7 @@ export function MobileAppNavigation() {
   const mobileItems = navigation.filter(
     (item) =>
       item.enabled &&
-      ["/app", "/app/proyectos", "/app/agentes", "/app/modelos", "/app/tecnologias"].includes(item.href),
+      ["/app", "/app/proyectos", "/app/agentes", "/app/modelos", "/app/conversaciones"].includes(item.href),
   );
 
   return (

@@ -14,12 +14,18 @@ export function FormSubmitButton({
   children,
   disabled,
   pendingLabel = "Procesando...",
+  type = "submit",
   ...props
 }: FormSubmitButtonProps) {
   const { pending } = useFormStatus();
 
   return (
-    <Button {...props} disabled={disabled || pending} aria-busy={pending}>
+    <Button
+      {...props}
+      type={type}
+      disabled={disabled || pending}
+      aria-busy={pending}
+    >
       {pending ? <LoaderCircle className="animate-spin" /> : null}
       {pending ? pendingLabel : children}
     </Button>

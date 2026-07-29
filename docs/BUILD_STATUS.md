@@ -1,6 +1,6 @@
 # NEXUS AI Office — estado de construcción
 
-Actualizado: 27 de julio de 2026.
+Actualizado: 28 de julio de 2026.
 
 ## Terminado
 
@@ -21,23 +21,33 @@ Actualizado: 27 de julio de 2026.
 - Capacidades, contexto, costos y puntuaciones por tarea y tecnología.
 - Preferencias de modelos por agente y proyecto.
 - Recomendador ponderado con razones y confianza.
-- RLS, validación entre workspaces y auditoría para proveedores/modelos.
+- Carga optimizada del recomendador según tarea y stack.
+- Conversaciones persistentes por proyecto.
+- Selección de agente, modelo, modo y tipo de tarea.
+- Streaming real para OpenAI, OpenRouter y APIs compatibles.
+- Cancelación visible y prevención de ejecuciones simultáneas por conversación.
+- Historial de mensajes y adjuntos básicos de texto/código.
+- Protección de adjuntos contra secretos evidentes.
+- Registro de tokens, costo estimado, duración, errores y cancelaciones.
+- Contexto permanente de proyecto y agente incorporado en cada ejecución.
+- RLS, validación entre workspaces y auditoría para el runtime de conversación.
 - Validadores Zod y pruebas unitarias esenciales.
 
 ## Siguiente bloque
 
-- Conversaciones persistentes.
-- Gateway de completions normalizadas.
-- Streaming por proveedor.
-- Selección de agente, proyecto y modelo.
-- Registro de tokens, costos, duración y errores.
-- Primer modo de agente individual.
+- Documentos en Supabase Storage.
+- Extracción y fragmentación de texto.
+- Embeddings y pgvector.
+- Memoria global, de proyecto y de agente.
+- Recuperación de contexto con fuentes visibles.
+- Administración, edición y eliminación de memorias.
 
 ## Después
 
-- Adjuntos y contexto activo.
-- Documentos y memoria semántica.
-- Orquestación multiagente y handoffs.
+- Orquestación multiagente y handoffs reales.
+- Herramientas con permisos y esquemas Zod.
 - Tareas, artefactos y diffs.
-- Aprendizaje del recomendador con feedback real.
+- Feedback y aprendizaje del recomendador.
 - Analítica, presupuestos y límites operativos.
+- Runtimes de Anthropic y Gemini.
+- Seguridad, rendimiento y preparación final para producción.

@@ -11,6 +11,7 @@ import {
   Fingerprint,
   FolderKanban,
   Layers3,
+  MessageSquareText,
   ShieldCheck,
 } from "lucide-react";
 
@@ -84,6 +85,8 @@ export default async function AppDashboardPage() {
     agentCountResult,
     activeAgentCountResult,
     projectAgentCountResult,
+    conversationCountResult,
+    completedRunCountResult,
   ] = await Promise.all([
     supabase
       .from("technologies")
@@ -127,6 +130,16 @@ export default async function AppDashboardPage() {
       .select("agent_id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
       .eq("status", "active"),
+    supabase
+      .from("conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
+    supabase
+      .from("agent_runs")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "completed"),
   ]);
 
   const technologyCount = technologyCountResult.count ?? 0;
@@ -138,6 +151,8 @@ export default async function AppDashboardPage() {
   const agentCount = agentCountResult.count ?? 0;
   const activeAgentCount = activeAgentCountResult.count ?? 0;
   const projectAgentCount = projectAgentCountResult.count ?? 0;
+  const conversationCount = conversationCountResult.count ?? 0;
+  const completedRunCount = completedRunCountResult.count ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
@@ -148,9 +163,9 @@ export default async function AppDashboardPage() {
             La oficina ya administra trabajo real.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            La base segura, los proyectos, los agentes y el catálogo de modelos están
-            conectados. Ya puedes preparar proveedores, registrar capacidades y definir
-            estrategias por proyecto sin acoplar la oficina a una sola IA.
+            La base segura, los proyectos, agentes y modelos ya ejecutan conversaciones reales.
+            Cada respuesta conserva historial, modelo, tokens, costo, duración y contexto aislado
+            por proyecto.
           </p>
         </div>
 
@@ -167,7 +182,7 @@ export default async function AppDashboardPage() {
         </div>
       </div>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
           {
             label: "Tecnologías",
@@ -192,6 +207,12 @@ export default async function AppDashboardPage() {
             value: agentCount,
             detail: `${activeAgentCount} activos · ${projectAgentCount} asignaciones`,
             icon: Bot,
+          },
+          {
+            label: "Conversaciones",
+            value: conversationCount,
+            detail: `${completedRunCount} ejecuciones completadas`,
+            icon: MessageSquareText,
           },
         ].map((item) => (
           <article key={item.label} className="nexus-panel rounded-2xl p-5">
@@ -325,6 +346,13 @@ export default async function AppDashboardPage() {
             >
               <Cpu />
               Abrir modelos IA
+            </Link>
+            <Link
+              href="/app/conversaciones"
+              className={buttonVariants()}
+            >
+              <MessageSquareText />
+              Abrir conversaciones
             </Link>
           </div>
         </section>

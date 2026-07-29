@@ -4,7 +4,7 @@ import { ArrowLeft, Coins, Sparkles } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { loadModelCatalog } from "@/modules/models/application/model-queries";
+import { loadRecommendationCatalog } from "@/modules/models/application/model-queries";
 import { MODEL_TASK_LABELS, MODEL_TASK_TYPES, type ModelTaskType } from "@/modules/models/domain/model";
 import { recommendModels } from "@/modules/models/domain/model-recommender";
 import { requireCurrentWorkspace } from "@/modules/workspaces/application/require-current-workspace";
@@ -22,22 +22,59 @@ export default async function RecommenderPage({ searchParams }: Props) {
   const budget = ["economy", "balanced", "quality"].includes(params.budget ?? "") ? params.budget as "economy" | "balanced" | "quality" : "balanced";
   const speed = ["fast", "balanced", "quality"].includes(params.speed ?? "") ? params.speed as "fast" | "balanced" | "quality" : "balanced";
   const estimatedContext = Math.max(0, Math.min(2_000_000, Number(params.context ?? 25000) || 0));
-  const [models, projectsResult, weightsResult] = await Promise.all([
-    loadModelCatalog(supabase, membership.workspaceId, { status: "active" }),
-    supabase.from("projects").select("id, name, status").eq("workspace_id", membership.workspaceId).neq("status", "archived").order("name"),
-    supabase.from("model_recommendation_weights").select("task_weight, technology_weight, reasoning_weight, context_weight, capability_weight, history_weight, cost_weight, speed_weight, preference_weight").eq("workspace_id", membership.workspaceId).maybeSingle(),
+  const hasRequest = Boolean(
+    params.task ||
+      params.project ||
+      params.reasoning ||
+      params.vision ||
+      params.tools ||
+      params.files,
+  );
+  const [projectsResult, weightsResult] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, name, status")
+      .eq("workspace_id", membership.workspaceId)
+      .neq("status", "archived")
+      .order("name"),
+    supabase
+      .from("model_recommendation_weights")
+      .select(
+        "task_weight, technology_weight, reasoning_weight, context_weight, capability_weight, history_weight, cost_weight, speed_weight, preference_weight",
+      )
+      .eq("workspace_id", membership.workspaceId)
+      .maybeSingle(),
   ]);
-  const selectedProjectId = (projectsResult.data ?? []).some((project) => project.id === params.project) ? params.project : "";
+  const selectedProjectId = (projectsResult.data ?? []).some(
+    (project) => project.id === params.project,
+  )
+    ? params.project
+    : "";
   let technologyIds: string[] = [];
   let preferredModelId: string | null = null;
   if (selectedProjectId) {
     const [technologyResult, preferenceResult] = await Promise.all([
-      supabase.from("project_technologies").select("technology_id").eq("workspace_id", membership.workspaceId).eq("project_id", selectedProjectId),
-      supabase.from("project_model_preferences").select("preferred_model_id").eq("workspace_id", membership.workspaceId).eq("project_id", selectedProjectId).maybeSingle(),
+      supabase
+        .from("project_technologies")
+        .select("technology_id")
+        .eq("workspace_id", membership.workspaceId)
+        .eq("project_id", selectedProjectId),
+      supabase
+        .from("project_model_preferences")
+        .select("preferred_model_id")
+        .eq("workspace_id", membership.workspaceId)
+        .eq("project_id", selectedProjectId)
+        .maybeSingle(),
     ]);
     technologyIds = (technologyResult.data ?? []).map((item) => item.technology_id);
     preferredModelId = preferenceResult.data?.preferred_model_id ?? null;
   }
+  const models = hasRequest
+    ? await loadRecommendationCatalog(supabase, membership.workspaceId, {
+        taskType: task,
+        technologyIds,
+      })
+    : [];
   const weights = weightsResult.data ? {
     task: weightsResult.data.task_weight,
     technology: weightsResult.data.technology_weight,
@@ -49,7 +86,6 @@ export default async function RecommenderPage({ searchParams }: Props) {
     speed: weightsResult.data.speed_weight,
     preference: weightsResult.data.preference_weight,
   } : undefined;
-  const hasRequest = Boolean(params.task || params.project || params.reasoning || params.vision || params.tools || params.files);
   const recommendations = hasRequest ? recommendModels(models, {
     taskType: task,
     technologyIds,

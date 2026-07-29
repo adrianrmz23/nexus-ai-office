@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   CirclePause,
   Edit3,
+  MessageSquarePlus,
   GitBranch,
   Globe2,
   RotateCcw,
@@ -422,13 +423,24 @@ export default async function ProjectDetailPage({
               stack técnico del proyecto.
             </p>
           </div>
-          <Link
-            href={`/app/proyectos/${project.id}/agentes`}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            <Bot />
-            Administrar equipo
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {assignedAgents.length > 0 && (
+              <Link
+                href={`/app/conversaciones/nueva?project=${project.id}`}
+                className={buttonVariants()}
+              >
+                <MessageSquarePlus />
+                Iniciar conversación
+              </Link>
+            )}
+            <Link
+              href={`/app/proyectos/${project.id}/agentes`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <Bot />
+              Administrar equipo
+            </Link>
+          </div>
         </div>
 
         {assignedAgents.length > 0 ? (

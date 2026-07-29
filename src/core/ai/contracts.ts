@@ -27,6 +27,7 @@ export type ChatCompletionRequest = {
   temperature?: number;
   maxOutputTokens?: number;
   stream?: boolean;
+  signal?: AbortSignal;
 };
 
 export type NormalizedToolCall = {
