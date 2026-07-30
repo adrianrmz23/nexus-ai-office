@@ -17,7 +17,7 @@ import {
 } from "@/infrastructure/ai/http";
 
 type Options = {
-  type: "openai" | "openrouter" | "openai_compatible";
+  type: "openai" | "kimi" | "deepseek" | "openrouter" | "openai_compatible";
   baseUrl: string;
   apiKey: string;
   appUrl?: string;
@@ -35,7 +35,12 @@ function inferKind(identifier: string): ProviderModelDescriptor["modelKind"] {
   if (value.includes("audio") || value.includes("whisper") || value.includes("tts")) {
     return "audio";
   }
-  if (value.includes("reason") || /(^|\/)o\d/.test(value)) return "reasoning";
+  if (
+    value.includes("reason") ||
+    value.includes("thinking") ||
+    value.includes("r1") ||
+    /(^|\/)o\d/.test(value)
+  ) return "reasoning";
   return "chat";
 }
 

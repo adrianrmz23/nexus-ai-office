@@ -96,7 +96,7 @@ export type MessageAttachmentRecord = {
 
 
 export type ConversationRetrievedSource = {
-  sourceType: "document_chunk" | "memory";
+  sourceType: "document_chunk" | "memory" | "project_file";
   sourceId: string;
   title: string;
   score: number;

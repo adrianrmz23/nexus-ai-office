@@ -10,6 +10,7 @@ import {
   Cpu,
   Fingerprint,
   FolderKanban,
+  FolderGit2,
   Layers3,
   MessageSquareText,
   ListTodo,
@@ -99,6 +100,8 @@ export default async function AppDashboardPage() {
     completedHandoffCountResult,
     activeTaskCountResult,
     artifactCountResult,
+    repositoryCountResult,
+    repositoryFileCountResult,
     recentUsageResult,
     recentFeedbackResult,
     activeBudgetResult,
@@ -176,6 +179,16 @@ export default async function AppDashboardPage() {
       .eq("workspace_id", membership.workspaceId)
       .neq("status", "archived"),
     supabase
+      .from("project_repositories")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
+    supabase
+      .from("project_files")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("status", "active"),
+    supabase
       .from("model_usage")
       .select("total_tokens, estimated_cost, currency")
       .eq("workspace_id", membership.workspaceId)
@@ -209,6 +222,8 @@ export default async function AppDashboardPage() {
   const completedHandoffCount = completedHandoffCountResult.count ?? 0;
   const activeTaskCount = activeTaskCountResult.count ?? 0;
   const artifactCount = artifactCountResult.count ?? 0;
+  const repositoryCount = repositoryCountResult.count ?? 0;
+  const repositoryFileCount = repositoryFileCountResult.count ?? 0;
   const recentTokenCount = (recentUsageResult.data ?? []).reduce(
     (sum, item) => sum + Number(item.total_tokens ?? 0),
     0,
@@ -297,6 +312,12 @@ export default async function AppDashboardPage() {
             value: artifactCount,
             detail: "Entregables versionados",
             icon: PackageOpen,
+          },
+          {
+            label: "Repositorios",
+            value: repositoryCount,
+            detail: `${repositoryFileCount} archivos de código`,
+            icon: FolderGit2,
           },
           {
             label: "Tokens · 30 días",
@@ -463,6 +484,13 @@ export default async function AppDashboardPage() {
             >
               <PackageOpen />
               Abrir artefactos
+            </Link>
+            <Link
+              href="/app/repositorios"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <FolderGit2 />
+              Abrir repositorios
             </Link>
             <Link
               href="/app/analitica"

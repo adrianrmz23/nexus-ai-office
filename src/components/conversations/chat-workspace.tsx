@@ -19,10 +19,12 @@ import {
   Clock3,
   Cpu,
   FileCode2,
+  FolderGit2,
   LoaderCircle,
   Paperclip,
   Send,
   Sparkles,
+  Search,
   Trash2,
   TriangleAlert,
   Users,
@@ -46,6 +48,7 @@ import type {
   ConversationModel,
 } from "@/modules/conversations/domain/conversation";
 import type { ProjectAgentOption } from "@/modules/conversations/application/conversation-queries";
+import type { ConversationProjectFileOption } from "@/modules/repositories/domain/repository";
 import { detectSensitiveAttachment } from "@/modules/conversations/domain/attachment-security";
 import {
   MODEL_TASK_LABELS,
@@ -141,6 +144,7 @@ export function ChatWorkspace({
   initialMessages,
   agents,
   models,
+  repositoryFiles,
 }: {
   conversation: {
     id: string;
@@ -155,6 +159,7 @@ export function ChatWorkspace({
   initialMessages: ConversationMessageRecord[];
   agents: ProjectAgentOption[];
   models: ConversationModel[];
+  repositoryFiles: ConversationProjectFileOption[];
 }) {
   const router = useRouter();
   const [messages, setMessages] = useState<LocalMessage[]>(initialMessages);
@@ -175,6 +180,9 @@ export function ChatWorkspace({
     currency: "USD",
     durationMs: null,
   });
+  const [projectFiles, setProjectFiles] = useState(repositoryFiles);
+  const [fileQuery, setFileQuery] = useState("");
+  const [isUpdatingFileContext, setIsUpdatingFileContext] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -187,6 +195,17 @@ export function ChatWorkspace({
     () => models.find((model) => model.id === modelId) ?? null,
     [models, modelId],
   );
+  const selectedProjectFiles = useMemo(
+    () => projectFiles.filter((file) => file.selected),
+    [projectFiles],
+  );
+  const filteredProjectFiles = useMemo(() => {
+    const query = fileQuery.trim().toLowerCase();
+    if (!query) return projectFiles;
+    return projectFiles.filter((file) =>
+      `${file.repositoryName} ${file.path} ${file.language ?? ""}`.toLowerCase().includes(query),
+    );
+  }, [projectFiles, fileQuery]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: isStreaming ? "auto" : "smooth" });
@@ -247,6 +266,32 @@ export function ChatWorkspace({
 
   function removeAttachment(index: number) {
     setAttachments((current) => current.filter((_, currentIndex) => currentIndex !== index));
+  }
+
+  async function toggleProjectFile(fileId: string, selected: boolean) {
+    if (isStreaming || isUpdatingFileContext) return;
+    setIsUpdatingFileContext(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/conversations/${conversation.id}/files`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileId, selected }),
+      });
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) throw new Error(data?.error ?? "No pudimos actualizar el contexto de archivos.");
+      setProjectFiles((current) =>
+        current.map((file) => (file.id === fileId ? { ...file, selected } : file)),
+      );
+    } catch (contextError) {
+      setError(
+        contextError instanceof Error
+          ? contextError.message
+          : "No pudimos actualizar el contexto de archivos.",
+      );
+    } finally {
+      setIsUpdatingFileContext(false);
+    }
   }
 
   async function sendMessage(event: FormEvent<HTMLFormElement>) {
@@ -857,7 +902,7 @@ export function ChatWorkspace({
                           >
                             <div className="font-medium text-secondary-foreground">{source.title}</div>
                             <div className="mt-1 text-[0.62rem] text-muted-foreground/80">
-                              {source.fileName ?? (source.sourceType === "memory" ? "Memoria estructurada" : "Documento")}
+                              {source.fileName ?? (source.sourceType === "memory" ? "Memoria estructurada" : source.sourceType === "project_file" ? "Archivo del proyecto" : "Documento")}
                               {source.chunkIndex !== null ? ` · fragmento ${source.chunkIndex + 1}` : ""}
                               {` · ${Math.round(source.score * 100)}%`}
                             </div>
@@ -1027,6 +1072,28 @@ export function ChatWorkspace({
             </div>
           )}
 
+          {selectedProjectFiles.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {selectedProjectFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/15 bg-cyan-400/[0.035] px-2.5 py-1.5 text-[0.67rem] text-cyan-700 dark:text-cyan-200/75"
+                >
+                  <FolderGit2 className="size-3.5" />
+                  <span className="max-w-56 truncate">{file.path}</span>
+                  <button
+                    type="button"
+                    onClick={() => toggleProjectFile(file.id, false)}
+                    disabled={isStreaming || isUpdatingFileContext}
+                    aria-label={`Quitar ${file.path} del contexto`}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {attachments.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {attachments.map((attachment, index) => (
@@ -1115,6 +1182,64 @@ export function ChatWorkspace({
           <div className="mt-1 text-xs text-muted-foreground/80">
             {selectedAgent?.role ?? "Selecciona un especialista"}
           </div>
+        </section>
+
+        <section className="nexus-panel rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <FolderGit2 className="size-4 text-primary/70" />
+              <div className="nexus-kicker">Archivos del proyecto</div>
+            </div>
+            <span className="rounded-full border border-border px-2 py-1 font-mono text-[0.58rem] text-muted-foreground/80">
+              {selectedProjectFiles.length}/8
+            </span>
+          </div>
+          {projectFiles.length ? (
+            <>
+              <div className="relative mt-4">
+                <Search className="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground/70" />
+                <input
+                  value={fileQuery}
+                  onChange={(event) => setFileQuery(event.target.value)}
+                  placeholder="Buscar archivo..."
+                  className="nexus-focus h-9 w-full rounded-lg border border-input bg-card pr-3 pl-8 text-xs text-foreground"
+                />
+              </div>
+              <div className="nexus-scrollbar mt-3 max-h-72 space-y-1.5 overflow-y-auto pr-1">
+                {filteredProjectFiles.slice(0, 80).map((file) => (
+                  <label
+                    key={file.id}
+                    className="flex cursor-pointer items-start gap-2 rounded-lg border border-border bg-muted/25 px-2.5 py-2 text-xs hover:border-primary/15"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={file.selected}
+                      onChange={(event) => toggleProjectFile(file.id, event.target.checked)}
+                      disabled={isStreaming || isUpdatingFileContext || (!file.selected && selectedProjectFiles.length >= 8)}
+                      className="mt-0.5 accent-[#55e6c1]"
+                    />
+                    <span className="min-w-0">
+                      <span className="block break-all font-mono text-[0.65rem] text-foreground">{file.path}</span>
+                      <span className="mt-1 block text-[0.58rem] text-muted-foreground/70">{file.repositoryName} · v{file.versionNumber}</span>
+                    </span>
+                  </label>
+                ))}
+                {!filteredProjectFiles.length ? (
+                  <p className="py-4 text-center text-xs text-muted-foreground/70">Sin coincidencias.</p>
+                ) : null}
+              </div>
+              <Link
+                href={`/app/repositorios?project=${conversation.projectId}`}
+                className="mt-3 inline-flex text-xs font-medium text-primary/75 hover:text-primary"
+              >
+                Explorar repositorios <ArrowRight className="ml-1 size-3.5" />
+              </Link>
+            </>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-border p-4 text-xs leading-5 text-muted-foreground/70">
+              Este proyecto todavía no tiene archivos importados.
+            </div>
+          )}
         </section>
 
         <section className="nexus-panel rounded-2xl p-5">

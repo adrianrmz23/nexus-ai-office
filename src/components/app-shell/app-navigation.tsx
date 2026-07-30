@@ -8,6 +8,7 @@ import {
   BrainCircuit,
   ChartNoAxesCombined,
   FolderKanban,
+  FolderGit2,
   LayoutDashboard,
   MessageSquareText,
   Cpu,
@@ -41,6 +42,13 @@ const navigation: NavigationItem[] = [
     mobileLabel: "Proyectos",
     href: "/app/proyectos",
     icon: FolderKanban,
+    enabled: true,
+  },
+  {
+    label: "Repositorios",
+    mobileLabel: "Código",
+    href: "/app/repositorios",
+    icon: FolderGit2,
     enabled: true,
   },
   {

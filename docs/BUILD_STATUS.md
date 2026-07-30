@@ -13,15 +13,28 @@
 - Bloque 09: tareas, artefactos versionados, revisión y registro técnico.
 - Bloque 10: analítica operativa, costos, feedback, presupuestos y aprendizaje del recomendador.
 - Bloque 10.1: temas claro/oscuro/sistema y reparación del catálogo Gemini.
+- Bloque 11: repositorios, inventario versionado, contexto de archivos y propuestas aprobables.
 
 ## Fase actual
 
-Fase 6 y 7 integradas — inteligencia operativa y herramientas profesionales.
+Fase 7 integrada — herramientas profesionales con contexto real de código.
 
 ## Pendiente inmediato
 
-- Integración con repositorios y lectura segura de archivos.
-- Parches aplicables y validación automática de cambios.
-- Tool calling confirmado para que agentes propongan tareas y artefactos dentro del runtime.
+- Tool calling confirmado dentro del runtime con límites por ejecución.
+- Integración autorizada con GitHub para ramas, commits y pull requests.
+- Validación automática de propuestas mediante pruebas y linters aislados.
 - Selección de modelo y presupuesto por paso.
 - Cola asíncrona para ejecuciones largas y recuperación ante interrupciones.
+
+## Bloque 12 — Robustez y producción
+
+- Kimi: implementado.
+- DeepSeek: implementado.
+- Rate limiting persistente: implementado.
+- Eventos de seguridad: implementado.
+- CSP con nonce y cabeceras: implementado.
+- Auditoría de postura: implementada.
+- Health check: implementado.
+- Script de verificación: implementado.
+- Validación completa pendiente de ejecutarse en el equipo del usuario por indisponibilidad de Zustand en el registro del entorno de generación.

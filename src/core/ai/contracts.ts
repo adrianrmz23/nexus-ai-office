@@ -2,6 +2,8 @@ export type AIProviderType =
   | "openai"
   | "anthropic"
   | "gemini"
+  | "kimi"
+  | "deepseek"
   | "openrouter"
   | "openai_compatible";
 

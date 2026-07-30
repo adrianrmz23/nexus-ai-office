@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import type { AIProviderType, ProviderModelDescriptor } from "@/core/ai/contracts";
 import { createProviderAdapter } from "@/infrastructure/ai/provider-registry";
 import { decryptCredential, encryptCredential } from "@/lib/security/credential-crypto";
+import { consumeRateLimit, recordSecurityEvent } from "@/lib/security/rate-limit";
 import { MODEL_TASK_TYPES } from "@/modules/models/domain/model";
 import {
   modelFormSchema,
@@ -90,6 +91,53 @@ async function getProviderWithCredential(providerId: string) {
   return { ...context, provider, apiKey };
 }
 
+async function enforceProviderRateLimit(input: {
+  context: Awaited<ReturnType<typeof getProviderWithCredential>>;
+  actionKey: string;
+  limit: number;
+  windowSeconds: number;
+}) {
+  let result;
+  try {
+    result = await consumeRateLimit({
+      supabase: input.context.supabase,
+      workspaceId: input.context.membership.workspaceId,
+      actionKey: input.actionKey,
+      limit: input.limit,
+      windowSeconds: input.windowSeconds,
+    });
+  } catch (error) {
+    redirectMessage(
+      `/app/modelos/proveedores/${input.context.provider.id}`,
+      "error",
+      error instanceof Error
+        ? error.message
+        : "No pudimos validar el límite operativo.",
+    );
+  }
+
+  if (!result.allowed) {
+    await recordSecurityEvent({
+      supabase: input.context.supabase,
+      workspaceId: input.context.membership.workspaceId,
+      eventType: "rate_limit.provider_blocked",
+      severity: "warning",
+      source: "model_management",
+      metadata: {
+        providerId: input.context.provider.id,
+        actionKey: input.actionKey,
+        retryAfterSeconds: result.retryAfterSeconds,
+      },
+    });
+
+    redirectMessage(
+      `/app/modelos/proveedores/${input.context.provider.id}`,
+      "error",
+      `Espera ${result.retryAfterSeconds} segundos antes de repetir esta operación.`,
+    );
+  }
+}
+
 export async function updateProviderSettings(formData: FormData) {
   const result = providerSettingsSchema.safeParse({
     providerId: textValue(formData, "providerId"),
@@ -163,6 +211,12 @@ export async function testProviderConnection(formData: FormData) {
   const parsed = uuidSchema.safeParse(textValue(formData, "providerId"));
   if (!parsed.success) redirectMessage("/app/modelos", "error", "El proveedor no es válido.");
   const context = await getProviderWithCredential(parsed.data);
+  await enforceProviderRateLimit({
+    context,
+    actionKey: "provider:test",
+    limit: 10,
+    windowSeconds: 600,
+  });
   const adapter = createProviderAdapter({
     type: context.provider.provider_type as AIProviderType,
     baseUrl: context.provider.base_url,
@@ -241,6 +295,12 @@ export async function syncProviderModels(formData: FormData) {
   }
 
   const context = await getProviderWithCredential(parsed.data);
+  await enforceProviderRateLimit({
+    context,
+    actionKey: "provider:sync",
+    limit: 6,
+    windowSeconds: 600,
+  });
   const adapter = createProviderAdapter({
     type: context.provider.provider_type as AIProviderType,
     baseUrl: context.provider.base_url,

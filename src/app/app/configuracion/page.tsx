@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Accessibility, MonitorCog } from "lucide-react";
+import Link from "next/link";
+import { Accessibility, ArrowRight, MonitorCog, ShieldCheck } from "lucide-react";
 
 import { ThemeSettings } from "@/components/theme/theme-settings";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Configuración" };
 
@@ -31,6 +33,24 @@ export default function SettingsPage() {
         </div>
         <div className="mt-6">
           <ThemeSettings />
+        </div>
+      </section>
+
+
+      <section className="mt-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Seguridad y producción</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                Audita RLS, buckets privados, credenciales, proveedores, límites operativos y variables necesarias para desplegar NEXUS.
+              </p>
+            </div>
+          </div>
+          <Link href="/app/configuracion/seguridad" className={buttonVariants({ variant: "outline" })}>
+            Abrir revisión <ArrowRight />
+          </Link>
         </div>
       </section>
 

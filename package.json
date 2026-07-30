@@ -11,7 +11,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "verify:production": "node scripts/verify-production.mjs",
+    "validate": "npm run typecheck && npm run lint && npm run test:run && npm run build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

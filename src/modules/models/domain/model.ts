@@ -2,9 +2,11 @@ import {
   BrainCircuit,
   Cpu,
   Gem,
+  MoonStar,
   Route,
   Server,
   Sparkles,
+  Waves,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,6 +44,8 @@ export const PROVIDER_TYPE_LABELS: Record<AIProviderType, string> = {
   openai: "OpenAI",
   anthropic: "Anthropic",
   gemini: "Google Gemini",
+  kimi: "Kimi · Moonshot AI",
+  deepseek: "DeepSeek",
   openrouter: "OpenRouter",
   openai_compatible: "Compatible con OpenAI",
 };
@@ -80,6 +84,8 @@ const PROVIDER_ICONS: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   brain: BrainCircuit,
   gem: Gem,
+  moon: MoonStar,
+  waves: Waves,
   route: Route,
   server: Server,
   cpu: Cpu,

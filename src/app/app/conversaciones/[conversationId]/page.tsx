@@ -13,6 +13,7 @@ import {
   loadProjectAgentOptions,
 } from "@/modules/conversations/application/conversation-queries";
 import { conversationIdSchema } from "@/modules/conversations/domain/conversation-schema";
+import { loadConversationFileOptions } from "@/modules/repositories/application/repository-queries";
 import { requireCurrentWorkspace } from "@/modules/workspaces/application/require-current-workspace";
 
 export const metadata: Metadata = { title: "Conversación" };
@@ -32,10 +33,16 @@ export default async function ConversationPage({ params }: Props) {
   );
   if (!conversation || !conversation.project) notFound();
 
-  const [messages, agents, models] = await Promise.all([
+  const [messages, agents, models, repositoryFiles] = await Promise.all([
     loadConversationMessages(supabase, membership.workspaceId, conversation.id, user.id),
     loadProjectAgentOptions(supabase, membership.workspaceId, [conversation.project_id]),
     loadExecutableModels(supabase, membership.workspaceId),
+    loadConversationFileOptions(
+      supabase,
+      membership.workspaceId,
+      conversation.project_id,
+      conversation.id,
+    ),
   ]);
 
   return (
@@ -74,6 +81,7 @@ export default async function ConversationPage({ params }: Props) {
           initialMessages={messages}
           agents={agents}
           models={models}
+          repositoryFiles={repositoryFiles}
         />
       )}
     </div>

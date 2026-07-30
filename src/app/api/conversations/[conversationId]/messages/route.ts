@@ -6,6 +6,7 @@ import { createModelAdapter } from "@/infrastructure/ai/provider-registry";
 import { ProviderRequestError } from "@/infrastructure/ai/http";
 import { getAppUrl } from "@/lib/env";
 import { decryptCredential } from "@/lib/security/credential-crypto";
+import { consumeRateLimit, recordSecurityEvent } from "@/lib/security/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import {
   appendAttachmentsToUserMessage,
@@ -39,6 +40,7 @@ import {
   renderRetrievedContext,
   retrieveMemoryContext,
 } from "@/modules/memory/application/memory-retrieval";
+import { loadConversationSelectedFileContext } from "@/modules/repositories/application/repository-queries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,8 +90,12 @@ type ConversationRow = {
   project: ProjectRecord;
 };
 
-function jsonError(message: string, status: number) {
-  return Response.json({ error: message }, { status });
+function jsonError(
+  message: string,
+  status: number,
+  headers?: HeadersInit,
+) {
+  return Response.json({ error: message }, { status, headers });
 }
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -145,7 +151,7 @@ async function loadRuntimeModels(input: {
     .in("model_kind", ["chat", "reasoning", "multimodal"])
     .eq("ai_providers.status", "active")
     .eq("ai_providers.credential_status", "configured")
-    .in("ai_providers.provider_type", ["openai", "gemini", "openrouter", "openai_compatible"])
+    .in("ai_providers.provider_type", ["openai", "gemini", "kimi", "deepseek", "openrouter", "openai_compatible"])
     .limit(500);
 
   const rows = (data ?? []) as unknown as Array<Record<string, unknown>>;
@@ -362,6 +368,52 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .maybeSingle();
   if (!membership) return jsonError("No existe una oficina activa.", 403);
 
+  const rateRule =
+    payload.mode === "team"
+      ? { actionKey: "chat:team", limit: 6, windowSeconds: 300 }
+      : { actionKey: "chat:individual", limit: 30, windowSeconds: 60 };
+
+  let rateLimit;
+  try {
+    rateLimit = await consumeRateLimit({
+      supabase,
+      workspaceId: membership.workspace_id,
+      ...rateRule,
+    });
+  } catch (error) {
+    return jsonError(
+      error instanceof Error
+        ? error.message
+        : "No pudimos validar el límite operativo.",
+      503,
+    );
+  }
+
+  if (!rateLimit.allowed) {
+    await recordSecurityEvent({
+      supabase,
+      workspaceId: membership.workspace_id,
+      eventType: "rate_limit.chat_blocked",
+      severity: "warning",
+      source: "conversation_runtime",
+      metadata: {
+        mode: payload.mode,
+        conversationId: idResult.data,
+        retryAfterSeconds: rateLimit.retryAfterSeconds,
+      },
+    });
+
+    return jsonError(
+      `Has alcanzado el límite temporal de ejecuciones. Intenta de nuevo en ${rateLimit.retryAfterSeconds} segundos.`,
+      429,
+      {
+        "Retry-After": String(rateLimit.retryAfterSeconds),
+        "X-RateLimit-Remaining": String(rateLimit.remaining),
+        "X-RateLimit-Reset": rateLimit.resetAt,
+      },
+    );
+  }
+
   const { data: conversationData } = await supabase
     .from("conversations")
     .select(
@@ -536,17 +588,38 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const retrieval = await retrieveMemoryContext({
-    supabase,
-    workspaceId: membership.workspace_id,
-    projectId: project.id,
-    agentId: agent.id,
-    conversationId: conversation.id,
-    query: payload.content,
-    limit: 8,
-  });
-  const retrievedSources = compactRetrievalSources(retrieval.sources);
-  const renderedRetrievedContext = renderRetrievedContext(retrieval.sources);
+  const [retrieval, repositoryContext] = await Promise.all([
+    retrieveMemoryContext({
+      supabase,
+      workspaceId: membership.workspace_id,
+      projectId: project.id,
+      agentId: agent.id,
+      conversationId: conversation.id,
+      query: payload.content,
+      limit: 8,
+    }),
+    loadConversationSelectedFileContext({
+      supabase,
+      workspaceId: membership.workspace_id,
+      projectId: project.id,
+      conversationId: conversation.id,
+      maxFiles: 8,
+      maxCharacters: 160_000,
+    }),
+  ]);
+  const retrievedSources = [
+    ...compactRetrievalSources(retrieval.sources),
+    ...repositoryContext.sources,
+  ];
+  const renderedMemoryContext = renderRetrievedContext(retrieval.sources);
+  const renderedRetrievedContext = [
+    renderedMemoryContext,
+    repositoryContext.rendered
+      ? `ARCHIVOS REALES SELECCIONADOS POR EL USUARIO\n${repositoryContext.rendered}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   const projectContext = {
     name: project.name,
     description: project.description,
@@ -586,7 +659,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     requiresReasoning: ["debugging", "architecture", "analysis"].includes(payload.taskType),
     requiresVision: false,
     requiresTools: false,
-    requiresFiles: payload.attachments.length > 0,
+    requiresFiles: payload.attachments.length > 0 || repositoryContext.fileIds.length > 0,
     estimatedContextTokens,
     budgetProfile: projectPreference?.budget_profile ?? "balanced",
     speedPreference: projectPreference?.speed_preference ?? "balanced",
@@ -646,6 +719,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
       keyVersion: credential.key_version,
     });
   } catch (error) {
+    await recordSecurityEvent({
+      supabase,
+      workspaceId: membership.workspace_id,
+      eventType: "credential.decrypt_failed",
+      severity: "high",
+      source: "conversation_runtime",
+      metadata: { providerId: model.provider.id },
+    });
     return jsonError(
       error instanceof Error ? error.message : "No pudimos descifrar la credencial.",
       500,
@@ -781,8 +862,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
         attachment_count: payload.attachments.length,
         selected_manually: Boolean(payload.modelId),
         retrieval_mode: retrieval.mode,
-        retrieval_count: retrieval.sources.length,
+        retrieval_count: retrievedSources.length,
         retrieval_latency_ms: retrieval.latencyMs,
+        repository_file_context_count: repositoryContext.fileIds.length,
       },
     })
     .select("id")
@@ -790,6 +872,25 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (runError || !run) {
     await supabase.from("messages").update({ status: "failed", error_message: "No pudimos registrar la ejecución." }).eq("id", assistantMessage.id);
     return jsonError("No pudimos registrar la ejecución.", 500);
+  }
+
+  if (repositoryContext.fileIds.length) {
+    await supabase.from("agent_file_access_logs").insert(
+      repositoryContext.fileIds.map((fileId) => ({
+        workspace_id: membership.workspace_id,
+        project_id: project.id,
+        repository_id: null,
+        file_id: fileId,
+        conversation_id: conversation.id,
+        message_id: userMessage.id,
+        run_id: run.id,
+        agent_id: agent.id,
+        access_type: "context",
+        query_text: payload.content,
+        result_summary: { selected_by_user: true },
+        created_by: user.id,
+      })),
+    );
   }
 
   const recommendationEventResult = await supabase.from("model_recommendation_events").insert({
@@ -813,6 +914,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       budget_profile: recommendationInput.budgetProfile,
       speed_preference: recommendationInput.speedPreference,
       attachment_count: payload.attachments.length,
+      repository_file_context_count: repositoryContext.fileIds.length,
       mode: payload.mode,
     },
     was_overridden: Boolean(primaryRecommendation && primaryRecommendation.model.id !== model.id),
@@ -831,7 +933,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       run_id: run.id,
       query_text: payload.content,
       retrieval_mode: retrieval.mode,
-      result_count: retrieval.sources.length,
+      result_count: retrievedSources.length,
       latency_ms: retrieval.latencyMs,
       sources: retrievedSources,
       created_by: user.id,
@@ -983,7 +1085,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
                   attachment_count: payload.attachments.length,
                   selected_manually: Boolean(payload.modelId),
                   retrieval_mode: retrieval.mode,
-                  retrieval_count: retrieval.sources.length,
+                  retrieval_count: retrievedSources.length,
                   retrieval_latency_ms: retrieval.latencyMs,
                   team_execution_id: teamResult.executionId,
                   completed_handoffs: teamResult.completedHandoffs,

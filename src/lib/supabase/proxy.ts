@@ -12,8 +12,16 @@ function matchesRoute(pathname: string, routes: string[]) {
   );
 }
 
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  requestHeaders?: Headers,
+) {
+  const nextResponse = () =>
+    requestHeaders
+      ? NextResponse.next({ request: { headers: requestHeaders } })
+      : NextResponse.next();
+
+  let response = nextResponse();
 
   if (!hasSupabasePublicConfig()) {
     return response;
@@ -34,7 +42,7 @@ export async function updateSession(request: NextRequest) {
           request.cookies.set(name, value);
         });
 
-        response = NextResponse.next({ request });
+        response = nextResponse();
 
         cookiesToSet.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);

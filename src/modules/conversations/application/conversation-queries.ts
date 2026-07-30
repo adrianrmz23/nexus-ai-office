@@ -461,7 +461,7 @@ export async function loadConversationMessages(
       sources.flatMap((source: unknown) => {
         const record = recordOf(source);
         const sourceType = String(record.sourceType);
-        if (sourceType !== "document_chunk" && sourceType !== "memory") return [];
+        if (sourceType !== "document_chunk" && sourceType !== "memory" && sourceType !== "project_file") return [];
         return [
           {
             sourceType,
@@ -733,7 +733,7 @@ export async function loadExecutableModels(
     .in("model_kind", ["chat", "reasoning", "multimodal"])
     .eq("ai_providers.status", "active")
     .eq("ai_providers.credential_status", "configured")
-    .in("ai_providers.provider_type", ["openai", "gemini", "openrouter", "openai_compatible"])
+    .in("ai_providers.provider_type", ["openai", "gemini", "kimi", "deepseek", "openrouter", "openai_compatible"])
     .order("display_name")
     .limit(500);
 

@@ -12,6 +12,7 @@ import {
   Edit3,
   MessageSquarePlus,
   GitBranch,
+  FolderGit2,
   Globe2,
   RotateCcw,
   ServerCog,
@@ -142,6 +143,8 @@ export default async function ProjectDetailPage({
     artifactCountResult,
     decisionCountResult,
     errorCountResult,
+    repositoryCountResult,
+    repositoryFileCountResult,
   ] = await Promise.all([
     loadProjectTechnologies(
       supabase,
@@ -164,6 +167,8 @@ export default async function ProjectDetailPage({
     supabase.from("artifacts").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
     supabase.from("project_decisions").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id),
     supabase.from("error_solutions").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
+    supabase.from("project_repositories").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).neq("status", "archived"),
+    supabase.from("project_files").select("id", { count: "exact", head: true }).eq("workspace_id", membership.workspaceId).eq("project_id", project.id).eq("status", "active"),
   ]);
   const technologies = technologyResult.byProject.get(project.id) ?? [];
   const modelPreference = (modelPreferenceResult.data ?? null) as ModelPreferenceRecord | null;
@@ -463,7 +468,7 @@ export default async function ProjectDetailPage({
         </div>
 
         {assignedAgents.length > 0 ? (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
             {assignedAgents.slice(0, 4).map((assignment) => (
               <Link
                 key={assignment.agent_id}
@@ -523,17 +528,22 @@ export default async function ProjectDetailPage({
             <Link href={`/app/artefactos?project=${project.id}`} className={buttonVariants({ variant: "outline" })}>
               <PackageOpen /> Ver artefactos
             </Link>
+            <Link href={`/app/repositorios?project=${project.id}`} className={buttonVariants({ variant: "outline" })}>
+              <FolderGit2 /> Ver repositorios
+            </Link>
             <Link href={`/app/proyectos/${project.id}/registro`} className={buttonVariants({ variant: "secondary" })}>
               <Gavel /> Registro técnico
             </Link>
           </div>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
           {[
             { label: "Tareas", value: taskCountResult.count ?? 0, icon: ListTodo },
             { label: "Artefactos", value: artifactCountResult.count ?? 0, icon: PackageOpen },
             { label: "Decisiones", value: decisionCountResult.count ?? 0, icon: Gavel },
             { label: "Errores resueltos", value: errorCountResult.count ?? 0, icon: BrainCircuit },
+            { label: "Repositorios", value: repositoryCountResult.count ?? 0, icon: FolderGit2 },
+            { label: "Archivos de código", value: repositoryFileCountResult.count ?? 0, icon: GitBranch },
           ].map((item) => (
             <article key={item.label} className="rounded-xl border border-border bg-muted/45 p-4">
               {createElement(item.icon, { className: "size-4 text-primary/70", "aria-hidden": true })}
