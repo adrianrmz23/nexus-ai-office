@@ -39,7 +39,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
-:root {
+:root,
+[data-theme="dark"] {
   --radius: 0.75rem;
   --background: #060a0f;
   --foreground: #f1f6f7;
@@ -67,7 +68,61 @@
   --sidebar-accent-foreground: #eef9f7;
   --sidebar-border: rgb(137 208 216 / 12%);
   --sidebar-ring: #55e6c1;
+  --nexus-panel-start: rgb(14 24 33 / 94%);
+  --nexus-panel-end: rgb(8 14 20 / 96%);
+  --nexus-panel-edge-a: rgb(124 238 220 / 25%);
+  --nexus-panel-edge-b: rgb(55 95 108 / 7%);
+  --nexus-panel-shadow: 0 24px 80px rgb(0 0 0 / 26%);
+  --nexus-panel-inset: inset 0 1px 0 rgb(255 255 255 / 3%);
+  --nexus-grid-line: rgb(104 190 199 / 5%);
+  --nexus-radial-a: rgb(18 92 104 / 17%);
+  --nexus-radial-b: rgb(24 91 75 / 12%);
+  --nexus-kicker: #6fe1d0;
+  --nexus-selection: #78ead0;
+  --nexus-selection-text: #06100e;
   color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --background: #eef3f5;
+  --foreground: #10222b;
+  --card: #ffffff;
+  --card-foreground: #10222b;
+  --popover: #ffffff;
+  --popover-foreground: #10222b;
+  --primary: #087f70;
+  --primary-foreground: #f5fffc;
+  --secondary: #e3ecef;
+  --secondary-foreground: #19343f;
+  --muted: #dde8eb;
+  --muted-foreground: #536c76;
+  --accent: #d7f0eb;
+  --accent-foreground: #075f56;
+  --destructive: #c9364d;
+  --border: rgb(35 91 101 / 20%);
+  --input: rgb(35 91 101 / 26%);
+  --ring: #087f70;
+  --sidebar: #f8fbfc;
+  --sidebar-foreground: #17313b;
+  --sidebar-primary: #087f70;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e4f2f0;
+  --sidebar-accent-foreground: #0b514a;
+  --sidebar-border: rgb(35 91 101 / 16%);
+  --sidebar-ring: #087f70;
+  --nexus-panel-start: rgb(255 255 255 / 98%);
+  --nexus-panel-end: rgb(247 251 252 / 98%);
+  --nexus-panel-edge-a: rgb(8 127 112 / 26%);
+  --nexus-panel-edge-b: rgb(68 111 121 / 10%);
+  --nexus-panel-shadow: 0 18px 55px rgb(25 63 72 / 11%);
+  --nexus-panel-inset: inset 0 1px 0 rgb(255 255 255 / 82%);
+  --nexus-grid-line: rgb(20 93 103 / 7%);
+  --nexus-radial-a: rgb(36 160 145 / 13%);
+  --nexus-radial-b: rgb(68 139 168 / 10%);
+  --nexus-kicker: #08796d;
+  --nexus-selection: #9ee8da;
+  --nexus-selection-text: #082c28;
+  color-scheme: light;
 }
 
 @layer base {
@@ -84,53 +139,54 @@
     @apply bg-background text-foreground antialiased;
     min-height: 100vh;
     background-image:
-      radial-gradient(
-        circle at 12% 0%,
-        rgb(18 92 104 / 17%),
-        transparent 30rem
-      ),
-      radial-gradient(circle at 88% 8%, rgb(24 91 75 / 12%), transparent 26rem);
+      radial-gradient(circle at 12% 0%, var(--nexus-radial-a), transparent 30rem),
+      radial-gradient(circle at 88% 8%, var(--nexus-radial-b), transparent 26rem);
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
   }
 
   ::selection {
-    color: #06100e;
-    background: #78ead0;
+    color: var(--nexus-selection-text);
+    background: var(--nexus-selection);
   }
 
   button,
   a {
     -webkit-tap-highlight-color: transparent;
   }
+
+  input,
+  textarea,
+  select {
+    color-scheme: inherit;
+  }
 }
 
 @layer utilities {
   .nexus-grid {
     background-image:
-      linear-gradient(rgb(104 190 199 / 5%) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(104 190 199 / 5%) 1px, transparent 1px);
+      linear-gradient(var(--nexus-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--nexus-grid-line) 1px, transparent 1px);
     background-size: 48px 48px;
     mask-image: linear-gradient(to bottom, black 20%, transparent 92%);
   }
 
   .nexus-panel {
     background:
-      linear-gradient(180deg, rgb(14 24 33 / 94%), rgb(8 14 20 / 96%))
-        padding-box,
-      linear-gradient(145deg, rgb(124 238 220 / 25%), rgb(55 95 108 / 7%))
-        border-box;
+      linear-gradient(180deg, var(--nexus-panel-start), var(--nexus-panel-end)) padding-box,
+      linear-gradient(145deg, var(--nexus-panel-edge-a), var(--nexus-panel-edge-b)) border-box;
     border: 1px solid transparent;
-    box-shadow:
-      0 24px 80px rgb(0 0 0 / 26%),
-      inset 0 1px 0 rgb(255 255 255 / 3%);
+    box-shadow: var(--nexus-panel-shadow), var(--nexus-panel-inset);
   }
 
   .nexus-kicker {
     @apply font-mono text-[0.68rem] font-medium tracking-[0.2em] uppercase;
-    color: #6fe1d0;
+    color: var(--nexus-kicker);
   }
 
   .nexus-muted {
-    color: #8ca0a6;
+    color: var(--muted-foreground);
   }
 
   .nexus-focus {
@@ -138,7 +194,47 @@
   }
 
   .nexus-scrollbar {
-    scrollbar-color: rgb(86 143 149 / 50%) transparent;
+    scrollbar-color: color-mix(in srgb, var(--primary) 42%, transparent) transparent;
     scrollbar-width: thin;
   }
+
+  .nexus-theme-transition,
+  .nexus-theme-transition * {
+    transition-property: color, background-color, border-color, box-shadow, fill, stroke;
+    transition-duration: 160ms;
+    transition-timing-function: ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nexus-theme-transition,
+  .nexus-theme-transition * {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Los tonos 100–300 fueron elegidos originalmente para fondo oscuro. En modo
+   claro se normalizan a tonos accesibles sin cambiar la semántica del estado. */
+[data-theme="light"] [class*="text-cyan-"] {
+  color: #0e7490;
+}
+
+[data-theme="light"] [class*="text-emerald-"] {
+  color: #047857;
+}
+
+[data-theme="light"] [class*="text-amber-"] {
+  color: #a16207;
+}
+
+[data-theme="light"] [class*="text-rose-"] {
+  color: #be123c;
+}
+
+[data-theme="light"] [class*="text-violet-"] {
+  color: #6d28d9;
+}
+
+[data-theme="light"] [class*="fill-cyan-"] {
+  fill: #0891b2;
 }

@@ -59,7 +59,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <Label htmlFor="password">Contraseña</Label>
             <Link
               href="/recuperar"
-              className="text-xs text-slate-400 transition-colors hover:text-primary"
+              className="text-xs text-muted-foreground transition-colors hover:text-primary"
             >
               ¿La olvidaste?
             </Link>

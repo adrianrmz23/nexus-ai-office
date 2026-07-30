@@ -23,16 +23,16 @@ export function AuthCard({
 
       <div className="nexus-panel rounded-2xl p-6 sm:p-8">
         <div className="nexus-kicker">{eyebrow}</div>
-        <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-white">
+        <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-foreground">
           {title}
         </h1>
-        <p className="mt-3 text-sm leading-6 text-slate-400">{description}</p>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
 
         <div className="mt-7">{children}</div>
       </div>
 
       {footer && (
-        <div className="mt-6 text-center text-sm text-slate-500">{footer}</div>
+        <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div>
       )}
     </section>
   );

@@ -43,8 +43,8 @@ export default async function NewConversationPage({ searchParams }: Props) {
       </Link>
       <div className="mt-5">
         <div className="nexus-kicker">Nueva sesión</div>
-        <h1 className="mt-3 text-3xl font-semibold text-white">Iniciar conversación</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+        <h1 className="mt-3 text-3xl font-semibold text-foreground">Iniciar conversación</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
           La conversación queda aislada dentro del proyecto y utilizará sus reglas, tecnologías y agentes asignados.
         </p>
       </div>
@@ -52,7 +52,7 @@ export default async function NewConversationPage({ searchParams }: Props) {
       <FormMessage error={params.error} success={params.success} />
 
       {!projects.length ? (
-        <section className="nexus-panel mt-7 rounded-2xl p-8 text-center text-sm text-slate-500">
+        <section className="nexus-panel mt-7 rounded-2xl p-8 text-center text-sm text-muted-foreground">
           Primero crea un proyecto activo.
         </section>
       ) : (

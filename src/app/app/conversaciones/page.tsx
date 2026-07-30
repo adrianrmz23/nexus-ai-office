@@ -53,8 +53,8 @@ export default async function ConversationsPage({ searchParams }: Props) {
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
         <div>
           <div className="nexus-kicker">Centro de trabajo</div>
-          <h1 className="mt-3 text-3xl font-semibold text-white">Conversaciones</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+          <h1 className="mt-3 text-3xl font-semibold text-foreground">Conversaciones</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
             Trabaja con agentes y modelos reales conservando historial, adjuntos, tokens, costo y duración por ejecución.
           </p>
         </div>
@@ -72,11 +72,11 @@ export default async function ConversationsPage({ searchParams }: Props) {
           ["Mensajes visibles", messageCount, "Historial recuperado"],
         ].map(([label, value, description]) => (
           <article key={String(label)} className="nexus-panel rounded-2xl p-5">
-            <div className="font-mono text-[0.62rem] tracking-[0.18em] text-slate-600 uppercase">
+            <div className="font-mono text-[0.62rem] tracking-[0.18em] text-muted-foreground/80 uppercase">
               {label}
             </div>
-            <div className="mt-3 text-2xl font-semibold text-white">{value}</div>
-            <div className="mt-2 text-xs text-slate-600">{description}</div>
+            <div className="mt-3 text-2xl font-semibold text-foreground">{value}</div>
+            <div className="mt-2 text-xs text-muted-foreground/80">{description}</div>
           </article>
         ))}
       </section>
@@ -84,18 +84,18 @@ export default async function ConversationsPage({ searchParams }: Props) {
       <section className="nexus-panel mt-5 rounded-2xl p-4 sm:p-5">
         <form className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem_13rem_auto]">
           <label className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-600" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground/80" />
             <input
               name="search"
               defaultValue={search}
               placeholder="Buscar conversación..."
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] pr-3 pl-10 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card pr-3 pl-10 text-sm text-foreground"
             />
           </label>
           <select
             name="project"
             defaultValue={params.project ?? ""}
-            className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3 text-sm text-foreground"
+            className="nexus-focus h-11 rounded-lg border border-input bg-card px-3 text-sm text-foreground"
           >
             <option value="">Todos los proyectos</option>
             {projects.map((project) => (
@@ -105,7 +105,7 @@ export default async function ConversationsPage({ searchParams }: Props) {
           <select
             name="status"
             defaultValue={status}
-            className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3 text-sm text-foreground"
+            className="nexus-focus h-11 rounded-lg border border-input bg-card px-3 text-sm text-foreground"
           >
             <option value="active">Activas</option>
             <option value="archived">Archivadas</option>
@@ -129,10 +129,10 @@ export default async function ConversationsPage({ searchParams }: Props) {
         <section className="nexus-panel mt-5 grid min-h-72 place-items-center rounded-2xl p-8 text-center">
           <div>
             <MessagesSquare className="mx-auto size-8 text-primary/40" />
-            <h2 className="mt-4 text-lg font-semibold text-slate-200">
+            <h2 className="mt-4 text-lg font-semibold text-foreground">
               No hay conversaciones para estos filtros
             </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground/80">
               Crea una sesión de trabajo vinculada a un proyecto, agente y modelo ejecutable.
             </p>
           </div>

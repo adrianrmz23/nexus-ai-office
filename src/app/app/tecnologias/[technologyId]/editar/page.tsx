@@ -55,10 +55,10 @@ export default async function EditTechnologyPage({
     <div className="mx-auto max-w-4xl pb-20 lg:pb-0">
       <div>
         <div className="nexus-kicker">Catálogo técnico</div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
           Editar {technology.name}
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           Ajusta la información técnica sin perder su historial ni relaciones.
         </p>
       </div>

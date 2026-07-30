@@ -85,10 +85,10 @@ export default async function EditProjectPage({
     <div className="mx-auto max-w-5xl pb-20 lg:pb-0">
       <div>
         <div className="nexus-kicker">Gestión operativa</div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
           Editar {project.name}
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           Actualiza la configuración sin perder el historial ni el aislamiento
           del proyecto.
         </p>

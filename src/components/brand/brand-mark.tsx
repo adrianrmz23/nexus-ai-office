@@ -44,10 +44,10 @@ export function BrandMark({
 
       {!compact && (
         <span className="flex flex-col leading-none">
-          <span className="text-sm font-bold tracking-[0.15em] text-white">
+          <span className="text-sm font-bold tracking-[0.15em] text-foreground">
             NEXUS
           </span>
-          <span className="mt-1 font-mono text-[0.58rem] tracking-[0.19em] text-slate-500">
+          <span className="mt-1 font-mono text-[0.58rem] tracking-[0.19em] text-muted-foreground">
             AI OFFICE
           </span>
         </span>

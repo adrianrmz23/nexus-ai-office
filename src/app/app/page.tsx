@@ -16,9 +16,13 @@ import {
   PackageOpen,
   ShieldCheck,
   Workflow,
+  ChartNoAxesCombined,
+  Coins,
+  Star,
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { getIsoTimestampDaysAgo } from "@/lib/server-date";
 import { cn } from "@/lib/utils";
 import { requireCurrentWorkspace } from "@/modules/workspaces/application/require-current-workspace";
 
@@ -78,6 +82,7 @@ const managementModules = [
 
 export default async function AppDashboardPage() {
   const { supabase, membership } = await requireCurrentWorkspace();
+  const recentActivityCutoff = getIsoTimestampDaysAgo(30);
   const [
     technologyCountResult,
     activeTechnologyCountResult,
@@ -94,6 +99,9 @@ export default async function AppDashboardPage() {
     completedHandoffCountResult,
     activeTaskCountResult,
     artifactCountResult,
+    recentUsageResult,
+    recentFeedbackResult,
+    activeBudgetResult,
   ] = await Promise.all([
     supabase
       .from("technologies")
@@ -167,6 +175,23 @@ export default async function AppDashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
       .neq("status", "archived"),
+    supabase
+      .from("model_usage")
+      .select("total_tokens, estimated_cost, currency")
+      .eq("workspace_id", membership.workspaceId)
+      .gte("created_at", recentActivityCutoff)
+      .limit(1000),
+    supabase
+      .from("user_feedback")
+      .select("rating, verdict")
+      .eq("workspace_id", membership.workspaceId)
+      .gte("created_at", recentActivityCutoff)
+      .limit(1000),
+    supabase
+      .from("usage_budgets")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("is_active", true),
   ]);
 
   const technologyCount = technologyCountResult.count ?? 0;
@@ -184,16 +209,26 @@ export default async function AppDashboardPage() {
   const completedHandoffCount = completedHandoffCountResult.count ?? 0;
   const activeTaskCount = activeTaskCountResult.count ?? 0;
   const artifactCount = artifactCountResult.count ?? 0;
+  const recentTokenCount = (recentUsageResult.data ?? []).reduce(
+    (sum, item) => sum + Number(item.total_tokens ?? 0),
+    0,
+  );
+  const recentFeedback = recentFeedbackResult.data ?? [];
+  const recentAverageRating = recentFeedback.length
+    ? recentFeedback.reduce((sum, item) => sum + Number(item.rating ?? 0), 0) / recentFeedback.length
+    : null;
+  const acceptedFeedbackCount = recentFeedback.filter((item) => item.verdict === "accepted").length;
+  const activeBudgetCount = activeBudgetResult.count ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl pb-20 lg:pb-0">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <div className="nexus-kicker">Estado de construcción</div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
             La oficina ya administra trabajo real.
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             La base segura, los proyectos, agentes y modelos ya ejecutan conversaciones reales.
             El modo equipo delega subtareas verificables y ahora cada resultado puede convertirse
             en tareas, artefactos versionados, decisiones y soluciones con trazabilidad completa.
@@ -203,7 +238,7 @@ export default async function AppDashboardPage() {
         <div className="flex shrink-0 items-center gap-2 rounded-xl border border-primary/12 bg-primary/[0.04] px-4 py-3">
           <span className="size-2 rounded-full bg-primary shadow-[0_0_10px_#55e6c1]" />
           <div>
-            <div className="text-xs font-semibold text-slate-200">
+            <div className="text-xs font-semibold text-foreground">
               Núcleo operativo
             </div>
             <div className="mt-1 font-mono text-[0.58rem] text-primary/70">
@@ -263,10 +298,22 @@ export default async function AppDashboardPage() {
             detail: "Entregables versionados",
             icon: PackageOpen,
           },
+          {
+            label: "Tokens · 30 días",
+            value: recentTokenCount.toLocaleString("es-MX"),
+            detail: `${activeBudgetCount} presupuestos activos`,
+            icon: Coins,
+          },
+          {
+            label: "Calidad observada",
+            value: recentAverageRating === null ? "—" : recentAverageRating.toFixed(1),
+            detail: `${acceptedFeedbackCount}/${recentFeedback.length} resultados aceptados`,
+            icon: Star,
+          },
         ].map((item) => (
           <article key={item.label} className="nexus-panel rounded-2xl p-5">
             <div className="flex items-center justify-between">
-              <div className="font-mono text-[0.6rem] tracking-[0.14em] text-slate-600 uppercase">
+              <div className="font-mono text-[0.6rem] tracking-[0.14em] text-muted-foreground/80 uppercase">
                 {item.label}
               </div>
               {createElement(item.icon, {
@@ -274,10 +321,10 @@ export default async function AppDashboardPage() {
                 "aria-hidden": true,
               })}
             </div>
-            <div className="mt-3 text-2xl font-semibold text-white">
+            <div className="mt-3 text-2xl font-semibold text-foreground">
               {item.value}
             </div>
-            <div className="mt-1 text-xs text-slate-600">{item.detail}</div>
+            <div className="mt-1 text-xs text-muted-foreground/80">{item.detail}</div>
           </article>
         ))}
       </section>
@@ -286,10 +333,10 @@ export default async function AppDashboardPage() {
         <section className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-100">
+              <div className="text-sm font-semibold text-foreground">
                 Fundamentos
               </div>
-              <div className="mt-1 text-xs text-slate-600">
+              <div className="mt-1 text-xs text-muted-foreground/80">
                 Base segura y mantenible
               </div>
             </div>
@@ -300,19 +347,19 @@ export default async function AppDashboardPage() {
             {foundations.map((item) => (
               <div
                 key={item.title}
-                className="flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.02] p-3.5"
+                className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3.5"
               >
-                <div className="grid size-9 place-items-center rounded-lg border border-white/[0.06] bg-black/10">
+                <div className="grid size-9 place-items-center rounded-lg border border-border bg-muted/45">
                   {createElement(item.icon, {
                     className: "size-4 text-primary/85",
                     "aria-hidden": true,
                   })}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-medium text-slate-200">
+                  <div className="text-xs font-medium text-foreground">
                     {item.title}
                   </div>
-                  <div className="mt-1 text-xs text-slate-600">
+                  <div className="mt-1 text-xs text-muted-foreground/80">
                     {item.detail}
                   </div>
                 </div>
@@ -325,10 +372,10 @@ export default async function AppDashboardPage() {
         <section className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-100">
+              <div className="text-sm font-semibold text-foreground">
                 Gestión principal
               </div>
-              <div className="mt-1 text-xs text-slate-600">
+              <div className="mt-1 text-xs text-muted-foreground/80">
                 Catálogos conectados con datos reales
               </div>
             </div>
@@ -339,14 +386,14 @@ export default async function AppDashboardPage() {
             {managementModules.map((item) => (
               <article
                 key={item.title}
-                className="rounded-xl border border-white/[0.055] bg-white/[0.018] p-4"
+                className="rounded-xl border border-border bg-muted/25 p-4"
               >
                 <div className="flex items-center justify-between">
-                  <div className="grid size-9 place-items-center rounded-lg border border-white/[0.06] bg-black/10">
+                  <div className="grid size-9 place-items-center rounded-lg border border-border bg-muted/45">
                     {createElement(item.icon, {
                       className: cn(
                         "size-4",
-                        item.complete ? "text-primary/85" : "text-slate-700",
+                        item.complete ? "text-primary/85" : "text-muted-foreground/60",
                       ),
                       "aria-hidden": true,
                     })}
@@ -354,20 +401,20 @@ export default async function AppDashboardPage() {
                   {item.complete ? (
                     <CheckCircle2 className="size-4 text-primary/75" />
                   ) : (
-                    <CircleDashed className="size-4 text-slate-700" />
+                    <CircleDashed className="size-4 text-muted-foreground/60" />
                   )}
                 </div>
-                <div className="mt-4 text-sm font-medium text-slate-200">
+                <div className="mt-4 text-sm font-medium text-foreground">
                   {item.title}
                 </div>
-                <div className="mt-2 text-xs leading-5 text-slate-600">
+                <div className="mt-2 text-xs leading-5 text-muted-foreground/80">
                   {item.detail}
                 </div>
               </article>
             ))}
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 border-t border-white/[0.055] pt-5 sm:flex-row sm:flex-wrap">
+          <div className="mt-5 flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:flex-wrap">
             <Link
               href="/app/proyectos"
               className={buttonVariants({ variant: "secondary" })}
@@ -416,6 +463,13 @@ export default async function AppDashboardPage() {
             >
               <PackageOpen />
               Abrir artefactos
+            </Link>
+            <Link
+              href="/app/analitica"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <ChartNoAxesCombined />
+              Abrir analítica
             </Link>
           </div>
         </section>

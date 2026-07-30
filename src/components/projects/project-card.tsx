@@ -67,7 +67,7 @@ export function ProjectCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-slate-100">
+            <h2 className="truncate text-base font-semibold text-foreground">
               {project.name}
             </h2>
             <span
@@ -82,7 +82,7 @@ export function ProjectCard({
                 project.status === "completed" &&
                   "border-violet-400/10 bg-violet-400/[0.04] text-violet-300/75",
                 project.status === "archived" &&
-                  "border-slate-400/10 bg-slate-400/[0.04] text-slate-500",
+                  "border-slate-400/10 bg-slate-400/[0.04] text-muted-foreground",
               )}
             >
               {PROJECT_STATUS_LABELS[project.status]}
@@ -92,18 +92,18 @@ export function ProjectCard({
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <span
               className={cn(
-                "rounded-md bg-white/[0.03] px-2 py-1",
+                "rounded-md bg-muted/40 px-2 py-1",
                 project.priority === "critical"
                   ? "text-rose-300/80"
                   : project.priority === "high"
                     ? "text-amber-300/75"
-                    : "text-slate-600",
+                    : "text-muted-foreground/80",
               )}
             >
               Prioridad {PROJECT_PRIORITY_LABELS[project.priority].toLowerCase()}
             </span>
             {project.client_name ? (
-              <span className="truncate text-slate-600">
+              <span className="truncate text-muted-foreground/80">
                 Cliente: {project.client_name}
               </span>
             ) : null}
@@ -111,7 +111,7 @@ export function ProjectCard({
         </div>
       </div>
 
-      <p className="mt-5 min-h-12 text-sm leading-6 text-slate-500">
+      <p className="mt-5 min-h-12 text-sm leading-6 text-muted-foreground">
         {project.description ||
           "Todavía no se ha agregado una descripción del proyecto."}
       </p>
@@ -122,7 +122,7 @@ export function ProjectCard({
             {visibleTechnologies.map(({ technology }) => (
               <span
                 key={technology.id}
-                className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.055] bg-white/[0.025] px-2 py-1 font-mono text-[0.58rem] text-slate-500"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/35 px-2 py-1 font-mono text-[0.58rem] text-muted-foreground"
               >
                 <span
                   className="size-1.5 rounded-full"
@@ -133,18 +133,18 @@ export function ProjectCard({
               </span>
             ))}
             {remainingTechnologies > 0 ? (
-              <span className="rounded-md bg-white/[0.025] px-2 py-1 font-mono text-[0.58rem] text-slate-600">
+              <span className="rounded-md bg-muted/35 px-2 py-1 font-mono text-[0.58rem] text-muted-foreground/80">
                 +{remainingTechnologies}
               </span>
             ) : null}
           </>
         ) : (
-          <span className="text-xs text-slate-700">Sin tecnologías asignadas</span>
+          <span className="text-xs text-muted-foreground/60">Sin tecnologías asignadas</span>
         )}
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 border-t border-white/[0.055] pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs text-slate-700">
+      <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xs text-muted-foreground/60">
           Actualizado {formatDate(project.updated_at)}
         </div>
 

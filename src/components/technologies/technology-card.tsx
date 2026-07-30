@@ -56,11 +56,11 @@ export function TechnologyCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-slate-100">
+            <h2 className="truncate text-base font-semibold text-foreground">
               {technology.name}
             </h2>
             {technology.version ? (
-              <span className="rounded-md border border-white/[0.06] bg-white/[0.025] px-2 py-0.5 font-mono text-[0.58rem] text-slate-500">
+              <span className="rounded-md border border-border bg-muted/35 px-2 py-0.5 font-mono text-[0.58rem] text-muted-foreground">
                 {technology.version}
               </span>
             ) : null}
@@ -78,7 +78,7 @@ export function TechnologyCard({
                 technology.status === "inactive" &&
                   "border-amber-400/10 bg-amber-400/[0.04] text-amber-300/75",
                 technology.status === "archived" &&
-                  "border-slate-400/10 bg-slate-400/[0.04] text-slate-500",
+                  "border-slate-400/10 bg-slate-400/[0.04] text-muted-foreground",
               )}
             >
               {TECHNOLOGY_STATUS_LABELS[technology.status]}
@@ -87,7 +87,7 @@ export function TechnologyCard({
         </div>
       </div>
 
-      <p className="mt-5 min-h-12 text-sm leading-6 text-slate-500">
+      <p className="mt-5 min-h-12 text-sm leading-6 text-muted-foreground">
         {technology.description ||
           "Todavía no se ha agregado una descripción técnica."}
       </p>
@@ -97,7 +97,7 @@ export function TechnologyCard({
           {technology.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-md bg-white/[0.035] px-2 py-1 font-mono text-[0.58rem] text-slate-600"
+              className="rounded-md bg-muted/45 px-2 py-1 font-mono text-[0.58rem] text-muted-foreground/80"
             >
               {tag}
             </span>
@@ -105,8 +105,8 @@ export function TechnologyCard({
         </div>
       ) : null}
 
-      <div className="mt-5 flex flex-col gap-3 border-t border-white/[0.055] pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs text-slate-700">
+      <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-xs text-muted-foreground/60">
           Actualizada {formatDate(technology.updated_at)}
         </div>
 

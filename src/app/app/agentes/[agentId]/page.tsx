@@ -119,14 +119,14 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
           </div>
           <div className="min-w-0">
             <div className="nexus-kicker">Perfil de agente</div>
-            <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.035em] text-white">
+            <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.035em] text-foreground">
               {agent.name}
             </h1>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               <span className="rounded-full border border-primary/10 bg-primary/[0.04] px-2.5 py-1 text-primary/75">
                 {AGENT_ROLE_LABELS[agent.role]}
               </span>
-              <span className="rounded-full border border-white/[0.06] bg-white/[0.025] px-2.5 py-1 text-slate-500">
+              <span className="rounded-full border border-border bg-muted/35 px-2.5 py-1 text-muted-foreground">
                 {AGENT_STATUS_LABELS[agent.status]}
               </span>
               {agent.agent_kind === "system" ? (
@@ -160,23 +160,23 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <Bot className="size-4 text-primary/70" />
-            <div className="text-sm font-semibold text-slate-100">Misión operativa</div>
+            <div className="text-sm font-semibold text-foreground">Misión operativa</div>
           </div>
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-500">
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">
             {agent.description || "Sin descripción registrada."}
           </p>
-          <div className="mt-6 grid gap-3 border-t border-white/[0.055] pt-5 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-3">
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Alcance</div>
-              <div className="mt-2 text-sm text-slate-300">{AGENT_SCOPE_LABELS[agent.scope]}</div>
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">Alcance</div>
+              <div className="mt-2 text-sm text-secondary-foreground">{AGENT_SCOPE_LABELS[agent.scope]}</div>
             </div>
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Creatividad</div>
-              <div className="mt-2 text-sm text-slate-300">{agent.creativity}/100</div>
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">Creatividad</div>
+              <div className="mt-2 text-sm text-secondary-foreground">{agent.creativity}/100</div>
             </div>
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Memoria</div>
-              <div className="mt-2 text-sm text-slate-300">{agent.memory_enabled ? "Habilitada" : "Deshabilitada"}</div>
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">Memoria</div>
+              <div className="mt-2 text-sm text-secondary-foreground">{agent.memory_enabled ? "Habilitada" : "Deshabilitada"}</div>
             </div>
           </div>
         </article>
@@ -184,17 +184,17 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <BrainCircuit className="size-4 text-primary/70" />
-            <div className="text-sm font-semibold text-slate-100">Estrategia de IA</div>
+            <div className="text-sm font-semibold text-foreground">Estrategia de IA</div>
           </div>
-          <div className="mt-5 rounded-xl border border-white/[0.055] bg-black/10 p-4">
-            <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">Modelo principal</div>
-            <div className="mt-2 text-sm text-slate-300">
+          <div className="mt-5 rounded-xl border border-border bg-muted/45 p-4">
+            <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">Modelo principal</div>
+            <div className="mt-2 text-sm text-secondary-foreground">
               {selectedModel
                 ? `${selectedModel.providerName} — ${selectedModel.displayName}`
                 : "Selección automática"}
             </div>
           </div>
-          <div className="mt-3 text-xs leading-5 text-slate-600">
+          <div className="mt-3 text-xs leading-5 text-muted-foreground/80">
             {modelPreference?.selection_mode === "fixed"
               ? "El agente intentará usar el modelo configurado antes de evaluar alternativas."
               : "NEXUS podrá elegir el modelo más conveniente según la tarea y el proyecto."}
@@ -216,14 +216,14 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Instrucciones principales</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">Comportamiento permanente</h2>
-        <pre className="nexus-scrollbar mt-5 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-white/[0.055] bg-black/15 p-4 font-mono text-xs leading-6 text-slate-400">
+        <h2 className="mt-2 text-base font-semibold text-foreground">Comportamiento permanente</h2>
+        <pre className="nexus-scrollbar mt-5 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-muted/50 p-4 font-mono text-xs leading-6 text-muted-foreground">
           {agent.instructions}
         </pre>
         {agent.escalation_rules ? (
           <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.025] p-4">
             <div className="text-xs font-medium text-amber-200/75">Reglas de escalamiento</div>
-            <p className="mt-2 whitespace-pre-wrap text-xs leading-6 text-slate-500">{agent.escalation_rules}</p>
+            <p className="mt-2 whitespace-pre-wrap text-xs leading-6 text-muted-foreground">{agent.escalation_rules}</p>
           </div>
         ) : null}
       </section>
@@ -232,52 +232,52 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <Network className="size-4 text-primary/70" />
-            <h2 className="text-sm font-semibold text-slate-100">Tecnologías</h2>
+            <h2 className="text-sm font-semibold text-foreground">Tecnologías</h2>
           </div>
           <div className="mt-4 space-y-2">
             {technologies.length > 0 ? technologies.map(({ technology, proficiency }) => (
-              <div key={technology.id} className="flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.018] px-3.5 py-3">
+              <div key={technology.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/25 px-3.5 py-3">
                 <span className="size-2 rounded-full" style={{ backgroundColor: technology.color }} />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm text-slate-300">{technology.name}</div>
-                  <div className="mt-1 text-xs text-slate-600">Dominio {proficiency}/5</div>
+                  <div className="truncate text-sm text-secondary-foreground">{technology.name}</div>
+                  <div className="mt-1 text-xs text-muted-foreground/80">Dominio {proficiency}/5</div>
                 </div>
               </div>
-            )) : <p className="text-sm leading-6 text-slate-600">Sin especialidades registradas.</p>}
+            )) : <p className="text-sm leading-6 text-muted-foreground/80">Sin especialidades registradas.</p>}
           </div>
         </article>
 
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <Wrench className="size-4 text-primary/70" />
-            <h2 className="text-sm font-semibold text-slate-100">Herramientas</h2>
+            <h2 className="text-sm font-semibold text-foreground">Herramientas</h2>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {agent.allowed_tools.length > 0 ? agent.allowed_tools.map((tool) => (
-              <span key={tool} className="rounded-lg border border-white/[0.055] bg-white/[0.02] px-2.5 py-2 text-xs text-slate-500">
+              <span key={tool} className="rounded-lg border border-border bg-muted/30 px-2.5 py-2 text-xs text-muted-foreground">
                 {AGENT_TOOL_LABELS[tool as AgentTool]}
               </span>
-            )) : <p className="text-sm leading-6 text-slate-600">Sin herramientas habilitadas.</p>}
+            )) : <p className="text-sm leading-6 text-muted-foreground/80">Sin herramientas habilitadas.</p>}
           </div>
         </article>
 
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <FolderKanban className="size-4 text-primary/70" />
-            <h2 className="text-sm font-semibold text-slate-100">Proyectos activos</h2>
+            <h2 className="text-sm font-semibold text-foreground">Proyectos activos</h2>
           </div>
           <div className="mt-4 space-y-2">
             {projectAssignments.length > 0 ? projectAssignments.map((assignment) => {
               const project = Array.isArray(assignment.projects) ? assignment.projects[0] : assignment.projects;
               if (!project) return null;
               return (
-                <Link key={project.id} href={`/app/proyectos/${project.id}`} className="nexus-focus flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.018] px-3.5 py-3 hover:border-primary/15">
+                <Link key={project.id} href={`/app/proyectos/${project.id}`} className="nexus-focus flex items-center gap-3 rounded-xl border border-border bg-muted/25 px-3.5 py-3 hover:border-primary/15">
                   <span className="size-2 rounded-full" style={{ backgroundColor: project.color }} />
-                  <span className="min-w-0 flex-1 truncate text-sm text-slate-300">{project.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-secondary-foreground">{project.name}</span>
                   {assignment.is_lead ? <span className="font-mono text-[0.55rem] text-primary/70">LÍDER</span> : null}
                 </Link>
               );
-            }) : <p className="text-sm leading-6 text-slate-600">Aún no participa en proyectos.</p>}
+            }) : <p className="text-sm leading-6 text-muted-foreground/80">Aún no participa en proyectos.</p>}
           </div>
         </article>
       </section>
@@ -285,19 +285,19 @@ export default async function AgentDetailPage({ params, searchParams }: PageProp
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="flex items-center gap-3">
           <Network className="size-4 text-primary/70" />
-          <h2 className="text-sm font-semibold text-slate-100">Red de colaboración</h2>
+          <h2 className="text-sm font-semibold text-foreground">Red de colaboración</h2>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {collaborators.length > 0 ? collaborators.map(({ target_agent: collaborator }) => (
             <Link
               key={collaborator.id}
               href={`/app/agentes/${collaborator.id}`}
-              className={cn("nexus-focus inline-flex items-center gap-2 rounded-lg border border-white/[0.055] bg-white/[0.02] px-3 py-2 text-xs text-slate-400 hover:border-primary/15")}
+              className={cn("nexus-focus inline-flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground hover:border-primary/15")}
             >
               <span className="size-2 rounded-full" style={{ backgroundColor: collaborator.color }} />
               {collaborator.name}
             </Link>
-          )) : <p className="text-sm leading-6 text-slate-600">No tiene handoffs directos configurados.</p>}
+          )) : <p className="text-sm leading-6 text-muted-foreground/80">No tiene handoffs directos configurados.</p>}
         </div>
       </section>
     </div>

@@ -71,7 +71,7 @@ export default async function RegisterPage({
             autoComplete="new-password"
             required
           />
-          <p className="text-xs leading-5 text-slate-600">
+          <p className="text-xs leading-5 text-muted-foreground/80">
             Mínimo 8 caracteres, una mayúscula, una minúscula y un número.
           </p>
         </div>

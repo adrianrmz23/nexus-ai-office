@@ -33,6 +33,7 @@ import type {
   ModelTaskType,
 } from "@/modules/models/domain/model";
 import { recommendModels } from "@/modules/models/domain/model-recommender";
+import { calculateModelHistoryScore } from "@/modules/models/domain/model-history-score";
 import {
   compactRetrievalSources,
   renderRetrievedContext,
@@ -144,14 +145,14 @@ async function loadRuntimeModels(input: {
     .in("model_kind", ["chat", "reasoning", "multimodal"])
     .eq("ai_providers.status", "active")
     .eq("ai_providers.credential_status", "configured")
-    .in("ai_providers.provider_type", ["openai", "openrouter", "openai_compatible"])
+    .in("ai_providers.provider_type", ["openai", "gemini", "openrouter", "openai_compatible"])
     .limit(500);
 
   const rows = (data ?? []) as unknown as Array<Record<string, unknown>>;
   if (!rows.length) return [];
   const modelIds = rows.map((row) => String(row.id));
 
-  const [taskResult, technologyResult] = await Promise.all([
+  const [taskResult, technologyResult, feedbackResult] = await Promise.all([
     supabase
       .from("model_task_scores")
       .select("model_id, score")
@@ -166,6 +167,12 @@ async function loadRuntimeModels(input: {
           .in("technology_id", technologyIds)
           .in("model_id", modelIds)
       : Promise.resolve({ data: [] as Array<{ model_id: string; technology_id: string; score: number }> }),
+    supabase
+      .from("user_feedback")
+      .select("model_id, rating, verdict, correction_count")
+      .eq("workspace_id", workspaceId)
+      .in("model_id", modelIds)
+      .gte("created_at", new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
   const taskByModel = new Map<string, number>();
@@ -175,6 +182,17 @@ async function loadRuntimeModels(input: {
     const current = technologyByModel.get(score.model_id) ?? {};
     current[score.technology_id] = score.score;
     technologyByModel.set(score.model_id, current);
+  }
+  const feedbackByModel = new Map<string, Array<{ rating: number; verdict: "accepted" | "partial" | "rejected"; correctionCount: number }>>();
+  for (const item of feedbackResult.data ?? []) {
+    if (!item.model_id) continue;
+    const current = feedbackByModel.get(item.model_id) ?? [];
+    current.push({
+      rating: Number(item.rating),
+      verdict: item.verdict as "accepted" | "partial" | "rejected",
+      correctionCount: Number(item.correction_count ?? 0),
+    });
+    feedbackByModel.set(item.model_id, current);
   }
 
   return rows.flatMap((row) => {
@@ -186,6 +204,7 @@ async function loadRuntimeModels(input: {
       row.model_capabilities as Record<string, unknown> | Record<string, unknown>[] | null,
     );
     const id = String(row.id);
+    const history = calculateModelHistoryScore(feedbackByModel.get(id) ?? []);
 
     return [
       {
@@ -253,6 +272,8 @@ async function loadRuntimeModels(input: {
           : null,
         taskScores: taskByModel.has(id) ? { [taskType]: taskByModel.get(id) } : {},
         technologyScores: technologyByModel.get(id) ?? {},
+        historyScore: history.score,
+        historySamples: history.samples,
       } satisfies RuntimeModel,
     ];
   });
@@ -264,11 +285,7 @@ function pickModel(input: {
   conversationModelId: string | null;
   projectModelId: string | null;
   agentModelId: string | null;
-  taskType: ModelTaskType;
-  technologyIds: string[];
-  estimatedContextTokens: number;
-  budgetProfile: "economy" | "balanced" | "quality";
-  speedPreference: "fast" | "balanced" | "quality";
+  recommendations: ReturnType<typeof recommendModels>;
 }): RuntimeModel | null {
   const directIds = [
     input.requestedModelId,
@@ -282,22 +299,7 @@ function pickModel(input: {
     if (match) return match;
   }
 
-  return (
-    recommendModels(input.models, {
-      taskType: input.taskType,
-      technologyIds: input.technologyIds,
-      requiresReasoning: ["debugging", "architecture", "analysis"].includes(
-        input.taskType,
-      ),
-      requiresVision: false,
-      requiresTools: false,
-      requiresFiles: false,
-      estimatedContextTokens: input.estimatedContextTokens,
-      budgetProfile: input.budgetProfile,
-      speedPreference: input.speedPreference,
-      preferredModelId: null,
-    })[0]?.model as RuntimeModel | undefined
-  ) ?? input.models[0] ?? null;
+  return (input.recommendations[0]?.model as RuntimeModel | undefined) ?? input.models[0] ?? null;
 }
 
 function attachmentChecksum(attachment: ChatAttachmentInput): string {
@@ -578,6 +580,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
   );
   const projectPreference = projectPreferenceResult.data;
   const agentPreference = agentPreferenceResult.data;
+  const recommendationInput = {
+    taskType: payload.taskType,
+    technologyIds,
+    requiresReasoning: ["debugging", "architecture", "analysis"].includes(payload.taskType),
+    requiresVision: false,
+    requiresTools: false,
+    requiresFiles: payload.attachments.length > 0,
+    estimatedContextTokens,
+    budgetProfile: projectPreference?.budget_profile ?? "balanced",
+    speedPreference: projectPreference?.speed_preference ?? "balanced",
+    preferredModelId:
+      conversation.preferred_model_id ??
+      projectPreference?.preferred_model_id ??
+      (agentPreference?.selection_mode === "fixed"
+        ? agentPreference.preferred_model_id
+        : null),
+  } as const;
+  const runtimeRecommendations = recommendModels(models, recommendationInput);
   const model = pickModel({
     models,
     requestedModelId: payload.modelId,
@@ -587,13 +607,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
       agentPreference?.selection_mode === "fixed"
         ? agentPreference.preferred_model_id
         : null,
-    taskType: payload.taskType,
-    technologyIds,
-    estimatedContextTokens,
-    budgetProfile: projectPreference?.budget_profile ?? "balanced",
-    speedPreference: projectPreference?.speed_preference ?? "balanced",
+    recommendations: runtimeRecommendations,
   });
   if (!model) return jsonError("No encontramos un modelo compatible.", 409);
+  const primaryRecommendation = runtimeRecommendations[0] ?? null;
+  const recommendationAlternatives = runtimeRecommendations.filter((item) => item.model.id !== primaryRecommendation?.model.id);
+  const economyAlternative = [...recommendationAlternatives].sort((a, b) => {
+    const aCost = (a.model.input_cost_per_million ?? Number.POSITIVE_INFINITY) + (a.model.output_cost_per_million ?? Number.POSITIVE_INFINITY);
+    const bCost = (b.model.input_cost_per_million ?? Number.POSITIVE_INFINITY) + (b.model.output_cost_per_million ?? Number.POSITIVE_INFINITY);
+    return aCost - bCost;
+  })[0] ?? null;
+  const qualityAlternative = recommendationAlternatives[0] ?? null;
   if (
     model.context_window !== null &&
     estimatedContextTokens > Math.floor(model.context_window * 0.85)
@@ -766,6 +790,36 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (runError || !run) {
     await supabase.from("messages").update({ status: "failed", error_message: "No pudimos registrar la ejecución." }).eq("id", assistantMessage.id);
     return jsonError("No pudimos registrar la ejecución.", 500);
+  }
+
+  const recommendationEventResult = await supabase.from("model_recommendation_events").insert({
+    workspace_id: membership.workspace_id,
+    project_id: project.id,
+    conversation_id: conversation.id,
+    user_message_id: userMessage.id,
+    run_id: run.id,
+    task_type: payload.taskType,
+    source: "runtime",
+    recommended_model_id: primaryRecommendation?.model.id ?? model.id,
+    selected_model_id: model.id,
+    alternative_economy_model_id: economyAlternative?.model.id ?? null,
+    alternative_quality_model_id: qualityAlternative?.model.id ?? null,
+    recommendation_score: primaryRecommendation?.score ?? null,
+    confidence: primaryRecommendation?.confidence ?? null,
+    reasons: primaryRecommendation?.reasons ?? [],
+    request_context: {
+      technology_ids: technologyIds,
+      estimated_context_tokens: estimatedContextTokens,
+      budget_profile: recommendationInput.budgetProfile,
+      speed_preference: recommendationInput.speedPreference,
+      attachment_count: payload.attachments.length,
+      mode: payload.mode,
+    },
+    was_overridden: Boolean(primaryRecommendation && primaryRecommendation.model.id !== model.id),
+    created_by: user.id,
+  });
+  if (recommendationEventResult.error) {
+    console.error("No pudimos registrar la recomendación del runtime:", recommendationEventResult.error.message);
   }
 
   await Promise.all([

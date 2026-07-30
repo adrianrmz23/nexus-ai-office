@@ -82,8 +82,8 @@ export function TaskForm({
 
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Trabajo verificable</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">Definición de la tarea</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+        <h2 className="mt-2 text-base font-semibold text-foreground">Definición de la tarea</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
           Cada tarea conserva proyecto, agente, conversación de origen, dependencias y criterios de aceptación.
         </p>
 
@@ -96,7 +96,7 @@ export function TaskForm({
               value={projectId}
               onChange={(event) => setProjectId(event.target.value)}
               disabled={mode === "edit"}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
               required
             >
               {projects.map((project) => (
@@ -112,7 +112,7 @@ export function TaskForm({
               id="assignedAgentId"
               name="assignedAgentId"
               defaultValue={initialValues.assignedAgentId}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             >
               <option value="">Sin asignar</option>
               {projectAgents.map((agent) => (
@@ -143,19 +143,19 @@ export function TaskForm({
           <div className="grid size-10 place-items-center rounded-xl border border-primary/10 bg-primary/[0.04]"><CalendarDays className="size-4 text-primary/75" /></div>
           <div>
             <div className="nexus-kicker">Planificación</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">Estado, prioridad y avance</h2>
+            <h2 className="mt-2 text-base font-semibold text-foreground">Estado, prioridad y avance</h2>
           </div>
         </div>
         <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="status">Estado</Label>
-            <select id="status" name="status" defaultValue={initialValues.status} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+            <select id="status" name="status" defaultValue={initialValues.status} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
               {TASK_STATUSES.map((status) => <option key={status} value={status}>{TASK_STATUS_LABELS[status]}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="priority">Prioridad</Label>
-            <select id="priority" name="priority" defaultValue={initialValues.priority} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+            <select id="priority" name="priority" defaultValue={initialValues.priority} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
               {TASK_PRIORITIES.map((priority) => <option key={priority} value={priority}>{TASK_PRIORITY_LABELS[priority]}</option>)}
             </select>
           </div>
@@ -175,23 +175,23 @@ export function TaskForm({
           <div className="grid size-10 place-items-center rounded-xl border border-primary/10 bg-primary/[0.04]"><Link2 className="size-4 text-primary/75" /></div>
           <div>
             <div className="nexus-kicker">Dependencias</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">Trabajo que debe completarse antes</h2>
+            <h2 className="mt-2 text-base font-semibold text-foreground">Trabajo que debe completarse antes</h2>
           </div>
         </div>
         {projectTasks.length ? (
           <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {projectTasks.map((task) => (
-              <label key={task.id} className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-3.5">
+              <label key={task.id} className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-3.5">
                 <input type="checkbox" name="dependencyIds" value={task.id} defaultChecked={selectedDependencies.has(task.id)} className="mt-0.5 size-4 accent-[#55e6c1]" />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm text-slate-200">{task.title}</span>
-                  <span className="mt-1 block text-xs text-slate-600">{TASK_STATUS_LABELS[task.status]}</span>
+                  <span className="block truncate text-sm text-foreground">{task.title}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground/80">{TASK_STATUS_LABELS[task.status]}</span>
                 </span>
               </label>
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-sm text-slate-600">No hay otras tareas disponibles para este proyecto.</p>
+          <p className="mt-5 text-sm text-muted-foreground/80">No hay otras tareas disponibles para este proyecto.</p>
         )}
       </section>
 
@@ -200,7 +200,7 @@ export function TaskForm({
           <ArrowLeft /> Cancelar
         </Link>
         <div className="flex items-center gap-2">
-          {initialValues.createdByAgentId ? <span className="hidden items-center gap-2 text-xs text-slate-600 sm:flex"><UserRoundCog className="size-4" /> Originada por un agente</span> : null}
+          {initialValues.createdByAgentId ? <span className="hidden items-center gap-2 text-xs text-muted-foreground/80 sm:flex"><UserRoundCog className="size-4" /> Originada por un agente</span> : null}
           <FormSubmitButton pendingLabel="Guardando..."><Save />{mode === "create" ? "Crear tarea" : "Guardar cambios"}</FormSubmitButton>
         </div>
       </div>

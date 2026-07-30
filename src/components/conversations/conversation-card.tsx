@@ -40,14 +40,14 @@ export function ConversationCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-slate-100">
+            <h2 className="truncate text-base font-semibold text-foreground">
               {conversation.title}
             </h2>
-            <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[0.62rem] text-slate-500">
+            <span className="rounded-full border border-border px-2 py-0.5 text-[0.62rem] text-muted-foreground">
               {archived ? "Archivada" : "Activa"}
             </span>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-600">
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground/80">
             <span>{conversation.project?.name ?? "Proyecto"}</span>
             <span className="inline-flex items-center gap-1.5">
               {conversation.mode === "team" ? <Users className="size-3.5" /> : <Bot className="size-3.5" />}
@@ -58,12 +58,12 @@ export function ConversationCard({
         </div>
       </div>
 
-      <p className="mt-5 min-h-12 text-sm leading-6 text-slate-500">
+      <p className="mt-5 min-h-12 text-sm leading-6 text-muted-foreground">
         {conversation.lastMessagePreview || "Todavía no hay mensajes en esta conversación."}
       </p>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.055] pt-4">
-        <div className="text-[0.68rem] text-slate-700">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+        <div className="text-[0.68rem] text-muted-foreground/60">
           Actualizada {formatDate(conversation.updated_at)}
         </div>
         <div className="flex items-center gap-2">

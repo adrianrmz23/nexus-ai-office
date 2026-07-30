@@ -15,10 +15,10 @@ export function AgentEmptyState({
       <div className="mx-auto grid size-12 place-items-center rounded-xl border border-primary/10 bg-primary/[0.04]">
         <Bot className="size-5 text-primary/75" />
       </div>
-      <h2 className="mt-5 text-lg font-semibold text-slate-100">
+      <h2 className="mt-5 text-lg font-semibold text-foreground">
         {filtered ? "No encontramos agentes" : "No hay agentes registrados"}
       </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {filtered
           ? "Ajusta la búsqueda o los filtros para consultar otros especialistas."
           : "Crea un agente personalizado y asígnale tecnologías, herramientas y colaboradores."}

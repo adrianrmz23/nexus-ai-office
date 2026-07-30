@@ -24,7 +24,7 @@ export default async function ConversationPage({ params }: Props) {
   const parsed = conversationIdSchema.safeParse(conversationId);
   if (!parsed.success) notFound();
 
-  const { supabase, membership } = await requireCurrentWorkspace();
+  const { supabase, membership, user } = await requireCurrentWorkspace();
   const conversation = await loadConversationById(
     supabase,
     membership.workspaceId,
@@ -33,7 +33,7 @@ export default async function ConversationPage({ params }: Props) {
   if (!conversation || !conversation.project) notFound();
 
   const [messages, agents, models] = await Promise.all([
-    loadConversationMessages(supabase, membership.workspaceId, conversation.id),
+    loadConversationMessages(supabase, membership.workspaceId, conversation.id, user.id),
     loadProjectAgentOptions(supabase, membership.workspaceId, [conversation.project_id]),
     loadExecutableModels(supabase, membership.workspaceId),
   ]);
@@ -50,11 +50,11 @@ export default async function ConversationPage({ params }: Props) {
       {conversation.status === "archived" ? (
         <section className="nexus-panel grid min-h-96 place-items-center rounded-2xl p-8 text-center">
           <div>
-            <Archive className="mx-auto size-8 text-slate-600" />
-            <h1 className="mt-4 text-xl font-semibold text-slate-200">
+            <Archive className="mx-auto size-8 text-muted-foreground/80" />
+            <h1 className="mt-4 text-xl font-semibold text-foreground">
               Esta conversación está archivada
             </h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-muted-foreground/80">
               Restáurala desde el listado para continuar trabajando.
             </p>
           </div>

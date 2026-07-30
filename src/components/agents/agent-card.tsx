@@ -52,7 +52,7 @@ export function AgentCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-slate-100">
+            <h2 className="truncate text-base font-semibold text-foreground">
               {agent.name}
             </h2>
             {agent.agent_kind === "system" ? (
@@ -68,19 +68,19 @@ export function AgentCard({
                 agent.status === "inactive" &&
                   "border-amber-400/10 bg-amber-400/[0.04] text-amber-300/75",
                 agent.status === "archived" &&
-                  "border-slate-400/10 bg-slate-400/[0.04] text-slate-500",
+                  "border-slate-400/10 bg-slate-400/[0.04] text-muted-foreground",
               )}
             >
               {AGENT_STATUS_LABELS[agent.status]}
             </span>
           </div>
-          <div className="mt-2 text-xs text-slate-600">
+          <div className="mt-2 text-xs text-muted-foreground/80">
             {AGENT_ROLE_LABELS[agent.role]} · {AGENT_SCOPE_LABELS[agent.scope]}
           </div>
         </div>
       </div>
 
-      <p className="mt-5 min-h-12 text-sm leading-6 text-slate-500">
+      <p className="mt-5 min-h-12 text-sm leading-6 text-muted-foreground">
         {agent.description || "Todavía no se ha agregado una descripción."}
       </p>
 
@@ -90,7 +90,7 @@ export function AgentCard({
             {visibleTechnologies.map(({ technology }) => (
               <span
                 key={technology.id}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.055] bg-white/[0.025] px-2.5 py-1 font-mono text-[0.58rem] text-slate-500"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/35 px-2.5 py-1 font-mono text-[0.58rem] text-muted-foreground"
               >
                 <span
                   className="size-1.5 rounded-full"
@@ -100,18 +100,18 @@ export function AgentCard({
               </span>
             ))}
             {remaining > 0 ? (
-              <span className="rounded-full border border-white/[0.055] bg-white/[0.025] px-2.5 py-1 font-mono text-[0.58rem] text-slate-600">
+              <span className="rounded-full border border-border bg-muted/35 px-2.5 py-1 font-mono text-[0.58rem] text-muted-foreground/80">
                 +{remaining}
               </span>
             ) : null}
           </>
         ) : (
-          <span className="text-xs text-slate-700">Sin tecnologías asignadas</span>
+          <span className="text-xs text-muted-foreground/60">Sin tecnologías asignadas</span>
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.055] pt-4">
-        <div className="text-xs text-slate-600">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+        <div className="text-xs text-muted-foreground/80">
           {projectCount} {projectCount === 1 ? "proyecto activo" : "proyectos activos"}
         </div>
 

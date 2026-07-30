@@ -1,5 +1,6 @@
 import type { AgentRole } from "@/modules/agents/domain/agent";
 import type { ModelTaskType } from "@/modules/models/domain/model";
+import type { MessageFeedbackRecord } from "@/modules/analytics/domain/analytics";
 
 export const CONVERSATION_MODES = ["individual", "team"] as const;
 export type ConversationMode = (typeof CONVERSATION_MODES)[number];
@@ -162,6 +163,7 @@ export type ConversationMessageRecord = {
   attachments: MessageAttachmentRecord[];
   retrievalSources: ConversationRetrievedSource[];
   teamExecution: ConversationTeamExecution | null;
+  feedback: MessageFeedbackRecord | null;
 };
 
 export type ChatAttachmentInput = {

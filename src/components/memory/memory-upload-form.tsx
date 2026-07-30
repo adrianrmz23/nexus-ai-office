@@ -20,10 +20,10 @@ export function MemoryUploadForm({
         </div>
         <div>
           <div className="nexus-kicker">Documento de contexto</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Agregar archivo
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Los archivos de texto y código se fragmentan e indexan. PDF y ZIP se conservan de forma privada, pero todavía no se extraen automáticamente.
           </p>
         </div>
@@ -36,7 +36,7 @@ export function MemoryUploadForm({
             id="document-scope"
             name="scopeType"
             defaultValue="project"
-            className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+            className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
           >
             <option value="project">Proyecto</option>
             <option value="global">Global de la oficina</option>
@@ -48,7 +48,7 @@ export function MemoryUploadForm({
             id="document-project"
             name="projectId"
             defaultValue={projects[0]?.id ?? ""}
-            className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+            className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
           >
             <option value="">Sin proyecto</option>
             {projects.map((project) => (
@@ -76,7 +76,7 @@ export function MemoryUploadForm({
             required
             accept=".txt,.md,.markdown,.json,.sql,.ts,.tsx,.js,.jsx,.php,.liquid,.css,.scss,.html,.htm,.log,.yaml,.yml,.xml,.csv,.toml,.ini,.sh,.ps1,.py,.java,.cs,.go,.rb,.vue,.pdf,.zip,text/*,application/pdf,application/zip,application/json"
           />
-          <p className="text-xs leading-5 text-slate-600">
+          <p className="text-xs leading-5 text-muted-foreground/80">
             Máximo 768 KB. Los archivos indexables deben estar en UTF-8.
           </p>
         </div>

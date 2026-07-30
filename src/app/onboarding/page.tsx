@@ -52,14 +52,14 @@ export default async function OnboardingPage({
         <BrandMark className="mb-10" />
 
         <div className="nexus-panel grid overflow-hidden rounded-2xl md:grid-cols-[0.9fr_1.1fr]">
-          <div className="border-b border-white/[0.06] bg-black/10 p-6 sm:p-8 md:border-r md:border-b-0">
+          <div className="border-b border-border bg-muted/45 p-6 sm:p-8 md:border-r md:border-b-0">
             <div className="grid size-11 place-items-center rounded-xl border border-primary/15 bg-primary/[0.05]">
               <Building2 className="size-5 text-primary" />
             </div>
-            <h1 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">
+            <h1 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-foreground">
               Nombra tu oficina
             </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Será el espacio superior que agrupe tus proyectos, agentes,
               modelos y permisos.
             </p>
@@ -72,7 +72,7 @@ export default async function OnboardingPage({
               ].map((item) => (
                 <div
                   key={item}
-                  className="flex items-center gap-2.5 text-xs text-slate-500"
+                  className="flex items-center gap-2.5 text-xs text-muted-foreground"
                 >
                   <CheckCircle2 className="size-3.5 text-primary/70" />
                   {item}
@@ -95,7 +95,7 @@ export default async function OnboardingPage({
                   autoFocus
                   required
                 />
-                <p className="text-xs leading-5 text-slate-600">
+                <p className="text-xs leading-5 text-muted-foreground/80">
                   Después agregaremos tecnologías, el primer proyecto y su
                   equipo de agentes.
                 </p>

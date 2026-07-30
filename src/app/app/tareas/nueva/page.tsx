@@ -27,8 +27,8 @@ export default async function NewTaskPage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-5xl pb-20 lg:pb-0">
       <div className="nexus-kicker">Nueva unidad de trabajo</div>
-      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">Crear tarea</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">La tarea puede originarse manualmente o conservar la trazabilidad de una respuesta de agente.</p>
+      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">Crear tarea</h1>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">La tarea puede originarse manualmente o conservar la trazabilidad de una respuesta de agente.</p>
       <div className="mt-7">
         <TaskForm
           action={createTask}

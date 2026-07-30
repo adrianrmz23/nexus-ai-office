@@ -19,12 +19,12 @@ export function TechnologyEmptyState({
         <div className="mx-auto grid size-12 place-items-center rounded-2xl border border-primary/12 bg-primary/[0.045]">
           <Sparkles className="size-5 text-primary/80" />
         </div>
-        <h2 className="mt-5 text-lg font-semibold text-slate-100">
+        <h2 className="mt-5 text-lg font-semibold text-foreground">
           {filtered
             ? "No encontramos coincidencias"
             : "El catálogo todavía está vacío"}
         </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {filtered
             ? "Modifica los filtros para consultar otras tecnologías."
             : "Registra la primera tecnología real de tu oficina para comenzar a construir proyectos especializados."}

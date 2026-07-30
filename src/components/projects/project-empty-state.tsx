@@ -25,10 +25,10 @@ export function ProjectEmptyState({
         <div className="mx-auto grid size-12 place-items-center rounded-2xl border border-primary/12 bg-primary/[0.045]">
           {iconElement}
         </div>
-        <h2 className="mt-5 text-lg font-semibold text-slate-100">
+        <h2 className="mt-5 text-lg font-semibold text-foreground">
           {filtered ? "No encontramos proyectos" : "La oficina aún no tiene proyectos"}
         </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {filtered
             ? "Modifica la búsqueda, el estado o la prioridad para consultar otros proyectos."
             : "Crea el primer proyecto real, asigna su stack y conserva sus instrucciones permanentes en un solo lugar."}

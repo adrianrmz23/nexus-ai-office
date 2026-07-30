@@ -73,10 +73,10 @@ export function TechnologyForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Identidad técnica</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Información principal
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Estos datos permitirán identificar la tecnología en proyectos,
             agentes y recomendaciones de modelos.
           </p>
@@ -102,7 +102,7 @@ export function TechnologyForm({
               id="category"
               name="category"
               defaultValue={values.category}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {TECHNOLOGY_CATEGORIES.map((category) => (
@@ -122,7 +122,7 @@ export function TechnologyForm({
               placeholder="Describe para qué se utiliza dentro de tus proyectos."
               maxLength={1200}
             />
-            <p className="text-xs leading-5 text-slate-600">
+            <p className="text-xs leading-5 text-muted-foreground/80">
               No incluyas contraseñas, tokens ni información secreta.
             </p>
           </div>
@@ -132,7 +132,7 @@ export function TechnologyForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Clasificación</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Apariencia y versión
           </h2>
         </div>
@@ -144,7 +144,7 @@ export function TechnologyForm({
               id="icon"
               name="icon"
               defaultValue={values.icon}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {TECHNOLOGY_ICONS.map((icon) => (
@@ -157,7 +157,7 @@ export function TechnologyForm({
 
           <div className="space-y-2">
             <Label htmlFor="color">Color de identificación</Label>
-            <div className="flex items-center gap-3 rounded-lg border border-input bg-white/[0.025] px-3 py-2">
+            <div className="flex items-center gap-3 rounded-lg border border-input bg-muted/35 px-3 py-2">
               <input
                 id="color"
                 name="color"
@@ -166,7 +166,7 @@ export function TechnologyForm({
                 className="h-7 w-12 cursor-pointer rounded border-0 bg-transparent p-0"
                 aria-label="Color de identificación"
               />
-              <span className="font-mono text-xs text-slate-500">
+              <span className="font-mono text-xs text-muted-foreground">
                 Se usará en tarjetas y relaciones.
               </span>
             </div>
@@ -189,7 +189,7 @@ export function TechnologyForm({
               id="status"
               name="status"
               defaultValue={values.status}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {(["active", "inactive"] as const).map((status) => (
@@ -226,7 +226,7 @@ export function TechnologyForm({
               placeholder="Frontend, SSR, React, TypeScript"
               maxLength={400}
             />
-            <p className="text-xs leading-5 text-slate-600">
+            <p className="text-xs leading-5 text-muted-foreground/80">
               Separa las etiquetas con comas. Se guardarán como máximo 12.
             </p>
           </div>
@@ -236,10 +236,10 @@ export function TechnologyForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Contexto permanente</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Prompt técnico base
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Escribe convenciones útiles que los agentes deberán considerar al
             trabajar con esta tecnología. Este contenido no sustituye las reglas
             específicas de cada proyecto.

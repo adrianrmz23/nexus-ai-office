@@ -29,10 +29,10 @@ export default async function NewTechnologyPage({
     <div className="mx-auto max-w-4xl pb-20 lg:pb-0">
       <div>
         <div className="nexus-kicker">Catálogo técnico</div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
           Nueva tecnología
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           Configura una especialidad reutilizable para los proyectos y agentes
           de {membership.role === "owner" ? "tu oficina" : "la oficina"}.
         </p>

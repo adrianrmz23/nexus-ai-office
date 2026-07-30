@@ -43,8 +43,8 @@ export default async function EditAgentPage({ params, searchParams }: PageProps)
   return (
     <div className="mx-auto max-w-5xl pb-20 lg:pb-0">
       <div className="nexus-kicker">Equipo especializado</div>
-      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">Editar {agent.name}</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">Editar {agent.name}</h1>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
         Ajusta su comportamiento sin perder las asignaciones ni el historial.
       </p>
       <div className="mt-8">

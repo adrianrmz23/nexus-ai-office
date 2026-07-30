@@ -92,14 +92,14 @@ function ContextBlock({
   emptyText: string;
 }) {
   return (
-    <article className="rounded-xl border border-white/[0.055] bg-black/10 p-4 sm:p-5">
-      <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+    <article className="rounded-xl border border-border bg-muted/45 p-4 sm:p-5">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {content ? (
-        <pre className="nexus-scrollbar mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-6 text-slate-500">
+        <pre className="nexus-scrollbar mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-6 text-muted-foreground">
           {content}
         </pre>
       ) : (
-        <p className="mt-3 text-sm leading-6 text-slate-600">{emptyText}</p>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground/80">{emptyText}</p>
       )}
     </article>
   );
@@ -196,7 +196,7 @@ export default async function ProjectDetailPage({
           </div>
           <div className="min-w-0">
             <div className="nexus-kicker">Centro del proyecto</div>
-            <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.035em] text-white">
+            <h1 className="mt-2 truncate text-3xl font-semibold tracking-[-0.035em] text-foreground">
               {project.name}
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
@@ -212,16 +212,16 @@ export default async function ProjectDetailPage({
                   project.status === "completed" &&
                     "border-violet-400/10 bg-violet-400/[0.04] text-violet-300/75",
                   project.status === "archived" &&
-                    "border-slate-400/10 bg-slate-400/[0.04] text-slate-500",
+                    "border-slate-400/10 bg-slate-400/[0.04] text-muted-foreground",
                 )}
               >
                 {PROJECT_STATUS_LABELS[project.status]}
               </span>
-              <span className="rounded-full border border-white/[0.06] bg-white/[0.025] px-2.5 py-1 text-slate-500">
+              <span className="rounded-full border border-border bg-muted/35 px-2.5 py-1 text-muted-foreground">
                 Prioridad {PROJECT_PRIORITY_LABELS[project.priority].toLowerCase()}
               </span>
               {project.client_name ? (
-                <span className="text-slate-600">Cliente: {project.client_name}</span>
+                <span className="text-muted-foreground/80">Cliente: {project.client_name}</span>
               ) : null}
             </div>
           </div>
@@ -296,35 +296,35 @@ export default async function ProjectDetailPage({
       <section className="mt-7 grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="nexus-kicker">Resumen</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Alcance actual
           </h2>
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-500">
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">
             {project.description ||
               "Todavía no se ha documentado la descripción de este proyecto."}
           </p>
-          <div className="mt-6 grid gap-3 border-t border-white/[0.055] pt-5 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 border-t border-border pt-5 sm:grid-cols-3">
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">
                 Presupuesto
               </div>
-              <div className="mt-2 text-sm text-slate-300">
+              <div className="mt-2 text-sm text-secondary-foreground">
                 {formatBudget(project.budget_amount, project.budget_currency)}
               </div>
             </div>
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">
                 Creado
               </div>
-              <div className="mt-2 text-sm text-slate-300">
+              <div className="mt-2 text-sm text-secondary-foreground">
                 {formatDate(project.created_at)}
               </div>
             </div>
             <div>
-              <div className="font-mono text-[0.58rem] tracking-wider text-slate-700 uppercase">
+              <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/60 uppercase">
                 Actualizado
               </div>
-              <div className="mt-2 text-sm text-slate-300">
+              <div className="mt-2 text-sm text-secondary-foreground">
                 {formatDate(project.updated_at)}
               </div>
             </div>
@@ -333,7 +333,7 @@ export default async function ProjectDetailPage({
 
         <article className="nexus-panel rounded-2xl p-5 sm:p-6">
           <div className="nexus-kicker">Stack activo</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Tecnologías asignadas
           </h2>
           {technologies.length > 0 ? (
@@ -341,7 +341,7 @@ export default async function ProjectDetailPage({
               {technologies.map(({ technology }) => (
                 <div
                   key={technology.id}
-                  className="flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.018] px-3.5 py-3"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-muted/25 px-3.5 py-3"
                 >
                   <span
                     className="size-2.5 rounded-full"
@@ -349,10 +349,10 @@ export default async function ProjectDetailPage({
                     aria-hidden="true"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-slate-200">
+                    <div className="truncate text-sm font-medium text-foreground">
                       {technology.name}
                     </div>
-                    <div className="mt-1 text-xs text-slate-600">
+                    <div className="mt-1 text-xs text-muted-foreground/80">
                       {technology.version ?? "Sin versión de referencia"}
                     </div>
                   </div>
@@ -360,7 +360,7 @@ export default async function ProjectDetailPage({
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-sm leading-6 text-slate-600">
+            <p className="mt-4 text-sm leading-6 text-muted-foreground/80">
               Este proyecto todavía no tiene tecnologías asignadas.
             </p>
           )}
@@ -369,7 +369,7 @@ export default async function ProjectDetailPage({
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Puntos de acceso</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">
+        <h2 className="mt-2 text-base font-semibold text-foreground">
           Repositorio y entornos
         </h2>
         <div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -392,13 +392,13 @@ export default async function ProjectDetailPage({
           ].map((item) => (
             <article
               key={item.label}
-              className="rounded-xl border border-white/[0.055] bg-black/10 p-4"
+              className="rounded-xl border border-border bg-muted/45 p-4"
             >
               {createElement(item.icon, {
                 className: "size-4 text-primary/70",
                 "aria-hidden": true,
               })}
-              <div className="mt-4 text-sm font-medium text-slate-200">
+              <div className="mt-4 text-sm font-medium text-foreground">
                 {item.label}
               </div>
               {item.url ? (
@@ -412,7 +412,7 @@ export default async function ProjectDetailPage({
                   <ArrowUpRight className="size-3.5 shrink-0" />
                 </a>
               ) : (
-                <div className="mt-2 text-xs text-slate-700">No configurado</div>
+                <div className="mt-2 text-xs text-muted-foreground/60">No configurado</div>
               )}
             </article>
           ))}
@@ -427,10 +427,10 @@ export default async function ProjectDetailPage({
               <Users className="size-4 text-primary/70" />
               <div className="nexus-kicker">Equipo del proyecto</div>
             </div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">
+            <h2 className="mt-2 text-base font-semibold text-foreground">
               Agentes asignados
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               Administra especialistas, liderazgo y recomendaciones basadas en el
               stack técnico del proyecto.
             </p>
@@ -468,7 +468,7 @@ export default async function ProjectDetailPage({
               <Link
                 key={assignment.agent_id}
                 href={`/app/agentes/${assignment.agent.id}`}
-                className="nexus-focus flex items-center gap-3 rounded-xl border border-white/[0.055] bg-white/[0.018] p-3.5 hover:border-primary/15"
+                className="nexus-focus flex items-center gap-3 rounded-xl border border-border bg-muted/25 p-3.5 hover:border-primary/15"
               >
                 <div
                   className="grid size-9 shrink-0 place-items-center rounded-lg border"
@@ -484,10 +484,10 @@ export default async function ProjectDetailPage({
                   })}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-slate-200">
+                  <div className="truncate text-sm font-medium text-foreground">
                     {assignment.agent.name}
                   </div>
-                  <div className="mt-1 text-xs text-slate-600">
+                  <div className="mt-1 text-xs text-muted-foreground/80">
                     {AGENT_ROLE_LABELS[assignment.agent.role]}
                     {assignment.is_lead ? " · Líder" : ""}
                   </div>
@@ -496,8 +496,8 @@ export default async function ProjectDetailPage({
             ))}
           </div>
         ) : (
-          <div className="mt-5 rounded-xl border border-dashed border-white/[0.08] bg-black/10 p-5">
-            <p className="text-sm leading-6 text-slate-600">
+          <div className="mt-5 rounded-xl border border-dashed border-border bg-muted/45 p-5">
+            <p className="text-sm leading-6 text-muted-foreground/80">
               Aún no hay agentes asignados. Abre el equipo para consultar la
               recomendación inicial de NEXUS.
             </p>
@@ -509,10 +509,10 @@ export default async function ProjectDetailPage({
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
             <div className="nexus-kicker">Trabajo profesional</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">
+            <h2 className="mt-2 text-base font-semibold text-foreground">
               Tareas, artefactos y registro técnico
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               Convierte conversaciones en trabajo verificable, conserva versiones y registra decisiones o soluciones aceptadas.
             </p>
           </div>
@@ -535,10 +535,10 @@ export default async function ProjectDetailPage({
             { label: "Decisiones", value: decisionCountResult.count ?? 0, icon: Gavel },
             { label: "Errores resueltos", value: errorCountResult.count ?? 0, icon: BrainCircuit },
           ].map((item) => (
-            <article key={item.label} className="rounded-xl border border-white/[0.055] bg-black/10 p-4">
+            <article key={item.label} className="rounded-xl border border-border bg-muted/45 p-4">
               {createElement(item.icon, { className: "size-4 text-primary/70", "aria-hidden": true })}
-              <div className="mt-4 text-2xl font-semibold text-white">{item.value}</div>
-              <div className="mt-1 text-xs text-slate-600">{item.label}</div>
+              <div className="mt-4 text-2xl font-semibold text-foreground">{item.value}</div>
+              <div className="mt-1 text-xs text-muted-foreground/80">{item.label}</div>
             </article>
           ))}
         </div>
@@ -558,10 +558,10 @@ export default async function ProjectDetailPage({
 
       <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Contexto estructurado</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">
+        <h2 className="mt-2 text-base font-semibold text-foreground">
           Instrucciones permanentes del proyecto
         </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
           Estas reglas se combinan con los documentos y memorias recuperados de forma verificable en cada conversación.
         </p>
         <div className="mt-5 grid gap-3 xl:grid-cols-3">

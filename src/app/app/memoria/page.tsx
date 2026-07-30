@@ -74,10 +74,10 @@ export default async function MemoryPage({ searchParams }: Props) {
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
         <div>
           <div className="nexus-kicker">Contexto verificable</div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
             Memoria de NEXUS
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
             Administra documentos, decisiones y preferencias sin mezclar información entre proyectos. Las fuentes recuperadas quedan visibles dentro de cada conversación.
           </p>
         </div>
@@ -101,11 +101,11 @@ export default async function MemoryPage({ searchParams }: Props) {
           ["Recuperaciones", stats.retrievals, "Consultas registradas"],
         ].map(([label, value, detail]) => (
           <article key={String(label)} className="nexus-panel rounded-2xl p-5">
-            <div className="font-mono text-[0.62rem] tracking-[0.16em] text-slate-600 uppercase">
+            <div className="font-mono text-[0.62rem] tracking-[0.16em] text-muted-foreground/80 uppercase">
               {label}
             </div>
-            <div className="mt-3 text-2xl font-semibold text-white">{value}</div>
-            <div className="mt-2 text-xs text-slate-600">{detail}</div>
+            <div className="mt-3 text-2xl font-semibold text-foreground">{value}</div>
+            <div className="mt-2 text-xs text-muted-foreground/80">{detail}</div>
           </article>
         ))}
       </section>
@@ -129,7 +129,7 @@ export default async function MemoryPage({ searchParams }: Props) {
           <select
             name="project"
             defaultValue={projectId}
-            className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3 text-sm text-foreground"
+            className="nexus-focus h-11 rounded-lg border border-input bg-card px-3 text-sm text-foreground"
           >
             <option value="">Todos los proyectos</option>
             {projects.map((project) => (
@@ -141,7 +141,7 @@ export default async function MemoryPage({ searchParams }: Props) {
           <select
             name="status"
             defaultValue={status}
-            className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3 text-sm text-foreground"
+            className="nexus-focus h-11 rounded-lg border border-input bg-card px-3 text-sm text-foreground"
           >
             <option value="all">Todos los estados</option>
             <optgroup label="Memorias">
@@ -180,7 +180,7 @@ export default async function MemoryPage({ searchParams }: Props) {
             ))}
           </div>
         ) : (
-          <div className="nexus-panel mt-4 rounded-2xl p-8 text-center text-sm text-slate-600">
+          <div className="nexus-panel mt-4 rounded-2xl p-8 text-center text-sm text-muted-foreground/80">
             No hay memorias para los filtros actuales.
           </div>
         )}
@@ -198,7 +198,7 @@ export default async function MemoryPage({ searchParams }: Props) {
             ))}
           </div>
         ) : (
-          <div className="nexus-panel mt-4 rounded-2xl p-8 text-center text-sm text-slate-600">
+          <div className="nexus-panel mt-4 rounded-2xl p-8 text-center text-sm text-muted-foreground/80">
             No hay documentos para los filtros actuales.
           </div>
         )}

@@ -24,7 +24,8 @@ function stringValues(formData: FormData, key: string): string[] {
   return formData.getAll(key).filter((value): value is string => typeof value === "string");
 }
 function redirectMessage(path: string, type: "error" | "success", message: string): never {
-  redirect(`${path}?${type}=${encodeURIComponent(message)}`);
+  const separator = path.includes("?") ? "&" : "?";
+  redirect(`${path}${separator}${type}=${encodeURIComponent(message)}`);
 }
 function firstIssue(error: { issues: { message: string }[] }): string {
   return error.issues[0]?.message ?? "Revisa los datos del formulario.";
@@ -225,9 +226,20 @@ function normalizedModelRow(
   };
 }
 
+function chunkItems<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
 export async function syncProviderModels(formData: FormData) {
   const parsed = uuidSchema.safeParse(textValue(formData, "providerId"));
-  if (!parsed.success) redirectMessage("/app/modelos", "error", "El proveedor no es válido.");
+  if (!parsed.success) {
+    redirectMessage("/app/modelos", "error", "El proveedor no es válido.");
+  }
+
   const context = await getProviderWithCredential(parsed.data);
   const adapter = createProviderAdapter({
     type: context.provider.provider_type as AIProviderType,
@@ -235,6 +247,7 @@ export async function syncProviderModels(formData: FormData) {
     apiKey: context.apiKey,
     appUrl: process.env.NEXT_PUBLIC_APP_URL,
   });
+
   let descriptors: ProviderModelDescriptor[];
   try {
     descriptors = await adapter.listModels();
@@ -242,25 +255,63 @@ export async function syncProviderModels(formData: FormData) {
     redirectMessage(
       `/app/modelos/proveedores/${context.provider.id}`,
       "error",
-      error instanceof Error ? error.message : "No pudimos sincronizar modelos.",
+      error instanceof Error
+        ? error.message
+        : "No pudimos sincronizar modelos.",
     );
   }
-  if (!descriptors.length) {
-    redirectMessage(`/app/modelos/proveedores/${context.provider.id}`, "error", "El proveedor no devolvió modelos disponibles.");
+
+  const uniqueDescriptors = [
+    ...new Map(
+      descriptors.map((descriptor) => [descriptor.apiIdentifier, descriptor]),
+    ).values(),
+  ];
+
+  if (!uniqueDescriptors.length) {
+    redirectMessage(
+      `/app/modelos/proveedores/${context.provider.id}`,
+      "error",
+      "El proveedor no devolvió modelos disponibles.",
+    );
   }
-  const rows = descriptors.map((descriptor) => normalizedModelRow(descriptor, {
-    workspaceId: context.membership.workspaceId,
-    providerId: context.provider.id,
-    userId: context.user.id,
+
+  const syncTimestamp = new Date().toISOString();
+  const rows = uniqueDescriptors.map((descriptor) => ({
+    ...normalizedModelRow(descriptor, {
+      workspaceId: context.membership.workspaceId,
+      providerId: context.provider.id,
+      userId: context.user.id,
+    }),
+    last_synced_at: syncTimestamp,
   }));
-  const { data: syncedModels, error } = await context.supabase
-    .from("ai_models")
-    .upsert(rows, { onConflict: "provider_id,api_identifier", ignoreDuplicates: false })
-    .select("id, api_identifier");
-  if (error || !syncedModels) {
-    redirectMessage(`/app/modelos/proveedores/${context.provider.id}`, "error", "No pudimos guardar el catálogo sincronizado.");
+
+  const syncedModels: Array<{ id: string; api_identifier: string }> = [];
+
+  for (const batch of chunkItems(rows, 100)) {
+    const { data, error } = await context.supabase
+      .from("ai_models")
+      .upsert(batch, {
+        onConflict: "provider_id,api_identifier",
+        ignoreDuplicates: false,
+      })
+      .select("id, api_identifier");
+
+    if (error || !data) {
+      redirectMessage(
+        `/app/modelos/proveedores/${context.provider.id}`,
+        "error",
+        error?.message
+          ? `No pudimos guardar el catálogo sincronizado: ${error.message}`
+          : "No pudimos guardar el catálogo sincronizado.",
+      );
+    }
+
+    syncedModels.push(...data);
   }
-  const descriptorsById = new Map(descriptors.map((descriptor) => [descriptor.apiIdentifier, descriptor]));
+
+  const descriptorsById = new Map(
+    uniqueDescriptors.map((descriptor) => [descriptor.apiIdentifier, descriptor]),
+  );
   const capabilityRows = syncedModels.map((model) => {
     const descriptor = descriptorsById.get(model.api_identifier);
     return {
@@ -271,29 +322,61 @@ export async function syncProviderModels(formData: FormData) {
       supports_streaming: descriptor?.capabilities.streaming ?? null,
       supports_vision: descriptor?.capabilities.vision ?? null,
       supports_files: descriptor?.capabilities.files ?? null,
-      supports_structured_output: descriptor?.capabilities.structuredOutput ?? null,
+      supports_structured_output:
+        descriptor?.capabilities.structuredOutput ?? null,
       supports_embeddings: descriptor?.capabilities.embeddings ?? null,
       created_by: context.user.id,
       updated_by: context.user.id,
     };
   });
-  const capabilitiesResult = await context.supabase
-    .from("model_capabilities")
-    .upsert(capabilityRows, { onConflict: "model_id" });
-  if (capabilitiesResult.error) {
-    redirectMessage(`/app/modelos/proveedores/${context.provider.id}`, "error", "Los modelos se guardaron, pero no sus capacidades.");
+
+  for (const batch of chunkItems(capabilityRows, 100)) {
+    const { error } = await context.supabase
+      .from("model_capabilities")
+      .upsert(batch, { onConflict: "model_id" });
+
+    if (error) {
+      redirectMessage(
+        `/app/modelos/proveedores/${context.provider.id}`,
+        "error",
+        `Los modelos se guardaron, pero no sus capacidades: ${error.message}`,
+      );
+    }
   }
-  await context.supabase
-    .from("ai_providers")
-    .update({
-      health_status: "healthy",
-      last_checked_at: new Date().toISOString(),
-      last_error: null,
-      updated_by: context.user.id,
-    })
-    .eq("id", context.provider.id);
+
+  const [{ count: providerModelCount, error: countError }, providerResult] =
+    await Promise.all([
+      context.supabase
+        .from("ai_models")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", context.membership.workspaceId)
+        .eq("provider_id", context.provider.id),
+      context.supabase
+        .from("ai_providers")
+        .update({
+          health_status: "healthy",
+          last_checked_at: syncTimestamp,
+          last_error: null,
+          updated_by: context.user.id,
+        })
+        .eq("id", context.provider.id)
+        .eq("workspace_id", context.membership.workspaceId),
+    ]);
+
+  if (countError || providerResult.error) {
+    redirectMessage(
+      `/app/modelos/proveedores/${context.provider.id}`,
+      "error",
+      "Los modelos se sincronizaron, pero no pudimos verificar el catálogo final.",
+    );
+  }
+
   revalidateModelPaths(context.provider.id);
-  redirectMessage(`/app/modelos/proveedores/${context.provider.id}`, "success", `Se sincronizaron ${syncedModels.length} modelos del proveedor.`);
+  redirectMessage(
+    `/app/modelos?provider=${context.provider.id}`,
+    "success",
+    `Se sincronizaron ${syncedModels.length} modelos. El proveedor tiene ${providerModelCount ?? syncedModels.length} modelos registrados.`,
+  );
 }
 
 function parseModelForm(formData: FormData) {

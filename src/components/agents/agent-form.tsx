@@ -120,10 +120,10 @@ export function AgentForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Identidad operativa</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Perfil del agente
           </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             Define su función, alcance y apariencia. La especialización técnica se
             conectará con los proyectos y el recomendador de equipos.
           </p>
@@ -149,7 +149,7 @@ export function AgentForm({
               id="role"
               name="role"
               defaultValue={values.role}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {AGENT_ROLES.map((role) => (
@@ -177,7 +177,7 @@ export function AgentForm({
               id="scope"
               name="scope"
               defaultValue={values.scope}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
             >
               {AGENT_SCOPES.map((scope) => (
                 <option key={scope} value={scope}>
@@ -193,7 +193,7 @@ export function AgentForm({
               id="status"
               name="status"
               defaultValue={values.status}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
             >
               {(["active", "inactive"] as const).map((status) => (
                 <option key={status} value={status}>
@@ -210,7 +210,7 @@ export function AgentForm({
 
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Representación visual</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">
+        <h2 className="mt-2 text-base font-semibold text-foreground">
           Apariencia en la oficina
         </h2>
 
@@ -221,7 +221,7 @@ export function AgentForm({
               id="icon"
               name="icon"
               defaultValue={values.icon}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
             >
               {AGENT_ICONS.map((icon) => (
                 <option key={icon} value={icon}>
@@ -233,7 +233,7 @@ export function AgentForm({
 
           <div className="space-y-2">
             <Label htmlFor="color">Color de identificación</Label>
-            <div className="flex items-center gap-3 rounded-lg border border-input bg-white/[0.025] px-3 py-2">
+            <div className="flex items-center gap-3 rounded-lg border border-input bg-muted/35 px-3 py-2">
               <input
                 id="color"
                 name="color"
@@ -242,7 +242,7 @@ export function AgentForm({
                 className="h-7 w-12 cursor-pointer rounded border-0 bg-transparent p-0"
                 aria-label="Color de identificación del agente"
               />
-              <span className="font-mono text-xs text-slate-500">
+              <span className="font-mono text-xs text-muted-foreground">
                 Se utilizará en actividad, handoffs y equipos.
               </span>
             </div>
@@ -258,7 +258,7 @@ export function AgentForm({
               placeholder="https://..."
               maxLength={500}
             />
-            <p className="text-xs leading-5 text-slate-600">
+            <p className="text-xs leading-5 text-muted-foreground/80">
               Si queda vacío, NEXUS utilizará el ícono y color seleccionados.
             </p>
           </div>
@@ -272,7 +272,7 @@ export function AgentForm({
           </div>
           <div>
             <div className="nexus-kicker">Comportamiento</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">
+            <h2 className="mt-2 text-base font-semibold text-foreground">
               Instrucciones y memoria
             </h2>
           </div>
@@ -305,12 +305,12 @@ export function AgentForm({
                 defaultValue={values.creativity}
                 className="nexus-focus h-11 w-full accent-[#55e6c1]"
               />
-              <p className="text-xs leading-5 text-slate-600">
+              <p className="text-xs leading-5 text-muted-foreground/80">
                 El proveedor traducirá este nivel a sus parámetros compatibles.
               </p>
             </div>
 
-            <label className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-4">
+            <label className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-4">
               <input
                 type="checkbox"
                 name="memoryEnabled"
@@ -318,10 +318,10 @@ export function AgentForm({
                 className="mt-0.5 size-4 accent-[#55e6c1]"
               />
               <span>
-                <span className="block text-sm font-medium text-slate-200">
+                <span className="block text-sm font-medium text-foreground">
                   Memoria habilitada
                 </span>
-                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                <span className="mt-1 block text-xs leading-5 text-muted-foreground/80">
                   Podrá consultar y guardar memoria cuando las herramientas y el
                   proyecto lo permitan.
                 </span>
@@ -346,10 +346,10 @@ export function AgentForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Especialización</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Tecnologías dominadas
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Estas relaciones alimentan la recomendación de equipos por proyecto.
           </p>
         </div>
@@ -359,7 +359,7 @@ export function AgentForm({
             {technologies.map((technology) => (
               <label
                 key={technology.id}
-                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-3.5 transition-colors hover:border-primary/20 hover:bg-primary/[0.025]"
+                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-3.5 transition-colors hover:border-primary/20 hover:bg-primary/[0.025]"
               >
                 <input
                   type="checkbox"
@@ -374,10 +374,10 @@ export function AgentForm({
                   aria-hidden="true"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-slate-200">
+                  <span className="block truncate text-sm font-medium text-foreground">
                     {technology.name}
                   </span>
-                  <span className="mt-1 block text-xs text-slate-600">
+                  <span className="mt-1 block text-xs text-muted-foreground/80">
                     {technology.version ? `${technology.version} · ` : ""}
                     {technology.status === "inactive"
                       ? "Inactiva"
@@ -388,7 +388,7 @@ export function AgentForm({
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-sm leading-6 text-slate-600">
+          <p className="mt-5 text-sm leading-6 text-muted-foreground/80">
             Todavía no hay tecnologías disponibles. Podrás asignarlas cuando el
             catálogo tenga registros.
           </p>
@@ -402,10 +402,10 @@ export function AgentForm({
           </div>
           <div>
             <div className="nexus-kicker">Permisos operativos</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">
+            <h2 className="mt-2 text-base font-semibold text-foreground">
               Herramientas permitidas
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               La selección define capacidades, no concede acceso automático a
               secretos ni operaciones destructivas.
             </p>
@@ -416,7 +416,7 @@ export function AgentForm({
           {AGENT_TOOLS.map((tool) => (
             <label
               key={tool}
-              className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-3.5"
+              className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-3.5"
             >
               <input
                 type="checkbox"
@@ -425,7 +425,7 @@ export function AgentForm({
                 defaultChecked={selectedTools.has(tool)}
                 className="mt-0.5 size-4 accent-[#55e6c1]"
               />
-              <span className="text-sm leading-5 text-slate-300">
+              <span className="text-sm leading-5 text-secondary-foreground">
                 {AGENT_TOOL_LABELS[tool]}
               </span>
             </label>
@@ -436,10 +436,10 @@ export function AgentForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Colaboración</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Handoffs permitidos
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Selecciona agentes a los que podrá transferir contexto cuando el
             orquestador habilite ejecuciones multiagente.
           </p>
@@ -450,7 +450,7 @@ export function AgentForm({
             {collaborators.map((collaborator) => (
               <label
                 key={collaborator.id}
-                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-3.5"
+                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-3.5"
               >
                 <input
                   type="checkbox"
@@ -460,10 +460,10 @@ export function AgentForm({
                   className="mt-0.5 size-4 accent-[#55e6c1]"
                 />
                 <span>
-                  <span className="block text-sm font-medium text-slate-200">
+                  <span className="block text-sm font-medium text-foreground">
                     {collaborator.name}
                   </span>
-                  <span className="mt-1 block text-xs text-slate-600">
+                  <span className="mt-1 block text-xs text-muted-foreground/80">
                     {AGENT_ROLE_LABELS[collaborator.role]}
                   </span>
                 </span>
@@ -471,7 +471,7 @@ export function AgentForm({
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-sm leading-6 text-slate-600">
+          <p className="mt-5 text-sm leading-6 text-muted-foreground/80">
             No hay otros agentes disponibles para colaboración.
           </p>
         )}
@@ -495,10 +495,10 @@ export function AgentForm({
             </div>
             <div>
               <div className="nexus-kicker">Estrategia de modelos</div>
-              <h2 className="mt-2 text-base font-semibold text-slate-100">
+              <h2 className="mt-2 text-base font-semibold text-foreground">
                 Preferencias desacopladas del agente
               </h2>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                 El modelo principal y sus alternativas se administran desde el perfil
                 del agente usando el catálogo real de la oficina.
               </p>
@@ -513,7 +513,7 @@ export function AgentForm({
               Configurar modelos
             </Link>
           ) : (
-            <span className="text-xs leading-5 text-slate-600">
+            <span className="text-xs leading-5 text-muted-foreground/80">
               Guarda el agente para configurar sus modelos.
             </span>
           )}

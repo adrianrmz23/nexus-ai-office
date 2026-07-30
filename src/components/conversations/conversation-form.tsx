@@ -40,14 +40,14 @@ export function ConversationForm({
     <form action={action} className="space-y-5">
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Punto de partida</div>
-        <h2 className="mt-2 text-lg font-semibold text-white">Configura la conversación</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+        <h2 className="mt-2 text-lg font-semibold text-foreground">Configura la conversación</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
           El proyecto aporta su stack, reglas y equipo. El modelo puede elegirse manualmente o resolverse con las preferencias configuradas.
         </p>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-2">
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs text-slate-300">
+            <span className="flex items-center gap-2 text-xs text-secondary-foreground">
               <FolderKanban className="size-4 text-primary/70" /> Proyecto
             </span>
             <select
@@ -55,7 +55,7 @@ export function ConversationForm({
               value={projectId}
               onChange={(event) => setProjectId(event.target.value)}
               required
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             >
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
@@ -66,7 +66,7 @@ export function ConversationForm({
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs text-slate-300">
+            <span className="flex items-center gap-2 text-xs text-secondary-foreground">
               <MessagesSquare className="size-4 text-primary/70" /> Título
             </span>
             <input
@@ -75,7 +75,7 @@ export function ConversationForm({
               minLength={2}
               maxLength={140}
               defaultValue="Nueva conversación técnica"
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             />
           </label>
         </div>
@@ -83,23 +83,23 @@ export function ConversationForm({
 
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Ejecución</div>
-        <h2 className="mt-2 text-lg font-semibold text-white">Agente y modelo</h2>
+        <h2 className="mt-2 text-lg font-semibold text-foreground">Agente y modelo</h2>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-3">
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs text-slate-300">
+            <span className="flex items-center gap-2 text-xs text-secondary-foreground">
               <Users className="size-4 text-primary/70" /> Modo
             </span>
             <select
               name="mode"
               value={mode}
               onChange={(event) => setMode(event.target.value as ConversationMode)}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             >
               <option value="individual">Agente individual</option>
               <option value="team">Equipo coordinado</option>
             </select>
-            <span className="block text-[0.7rem] leading-5 text-slate-600">
+            <span className="block text-[0.7rem] leading-5 text-muted-foreground/80">
               {mode === "team"
                 ? "El líder responde con el contexto de todo el equipo. Los handoffs reales se incorporarán en la fase multiagente."
                 : "Una ejecución directa del especialista seleccionado."}
@@ -107,7 +107,7 @@ export function ConversationForm({
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs text-slate-300">
+            <span className="flex items-center gap-2 text-xs text-secondary-foreground">
               <Bot className="size-4 text-primary/70" /> Agente
             </span>
             <select
@@ -119,7 +119,7 @@ export function ConversationForm({
                   : projectAgents.find((agent) => agent.isLead)?.id ?? projectAgents[0]?.id ?? ""
               }
               key={`${projectId}-${mode}`}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             >
               {mode === "team" && <option value="">Usar líder del proyecto</option>}
               {mode === "individual" && !projectAgents.length && (
@@ -134,13 +134,13 @@ export function ConversationForm({
           </label>
 
           <label className="space-y-2">
-            <span className="flex items-center gap-2 text-xs text-slate-300">
+            <span className="flex items-center gap-2 text-xs text-secondary-foreground">
               <Cpu className="size-4 text-primary/70" /> Modelo inicial
             </span>
             <select
               name="modelId"
               defaultValue=""
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
             >
               <option value="">Selección automática</option>
               {models.map((model) => (

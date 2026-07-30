@@ -31,14 +31,14 @@ export function DocumentCard({ document }: { document: MemoryDocumentRecord }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-slate-100">
+            <h3 className="truncate text-sm font-semibold text-foreground">
               {document.title}
             </h3>
-            <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-2 py-0.5 text-[0.62rem] text-slate-500">
+            <span className="rounded-full border border-border bg-muted/30 px-2 py-0.5 text-[0.62rem] text-muted-foreground">
               {DOCUMENT_STATUS_LABELS[document.status]}
             </span>
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-600">
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground/80">
             <span>{document.project?.name ?? "Memoria global"}</span>
             <span>{document.file_name ?? "Texto"}</span>
             <span>{formatBytes(document.size_bytes)}</span>
@@ -46,18 +46,18 @@ export function DocumentCard({ document }: { document: MemoryDocumentRecord }) {
         </div>
       </div>
 
-      <dl className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-white/[0.05] bg-black/10 p-3 text-center">
+      <dl className="mt-5 grid grid-cols-3 gap-2 rounded-xl border border-border bg-muted/45 p-3 text-center">
         <div>
-          <dt className="font-mono text-[0.55rem] tracking-wider text-slate-700 uppercase">Fragmentos</dt>
-          <dd className="mt-1 text-sm text-slate-300">{document.chunk_count}</dd>
+          <dt className="font-mono text-[0.55rem] tracking-wider text-muted-foreground/60 uppercase">Fragmentos</dt>
+          <dd className="mt-1 text-sm text-secondary-foreground">{document.chunk_count}</dd>
         </div>
         <div>
-          <dt className="font-mono text-[0.55rem] tracking-wider text-slate-700 uppercase">Embeddings</dt>
-          <dd className="mt-1 text-sm text-slate-300">{document.embedding_status}</dd>
+          <dt className="font-mono text-[0.55rem] tracking-wider text-muted-foreground/60 uppercase">Embeddings</dt>
+          <dd className="mt-1 text-sm text-secondary-foreground">{document.embedding_status}</dd>
         </div>
         <div>
-          <dt className="font-mono text-[0.55rem] tracking-wider text-slate-700 uppercase">Actualizado</dt>
-          <dd className="mt-1 text-xs text-slate-400">{formatDate(document.updated_at)}</dd>
+          <dt className="font-mono text-[0.55rem] tracking-wider text-muted-foreground/60 uppercase">Actualizado</dt>
+          <dd className="mt-1 text-xs text-muted-foreground">{formatDate(document.updated_at)}</dd>
         </div>
       </dl>
 
@@ -67,7 +67,7 @@ export function DocumentCard({ document }: { document: MemoryDocumentRecord }) {
         </p>
       ) : null}
 
-      <div className="mt-4 flex justify-end border-t border-white/[0.05] pt-4">
+      <div className="mt-4 flex justify-end border-t border-border pt-4">
         {document.status === "archived" ? (
           <form action={setDocumentStatus}>
             <input type="hidden" name="documentId" value={document.id} />

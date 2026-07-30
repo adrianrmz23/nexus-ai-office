@@ -15,10 +15,10 @@ export default function ProjectsError({ reset }: ProjectsErrorProps) {
         <div className="mx-auto grid size-12 place-items-center rounded-2xl border border-rose-400/15 bg-rose-400/[0.05]">
           <AlertTriangle className="size-5 text-rose-300" />
         </div>
-        <h1 className="mt-5 text-xl font-semibold text-slate-100">
+        <h1 className="mt-5 text-xl font-semibold text-foreground">
           No pudimos abrir los proyectos
         </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
           Reintenta la consulta. Si el problema continúa, verifica la migración
           del Bloque 03 y la conexión con Supabase.
         </p>

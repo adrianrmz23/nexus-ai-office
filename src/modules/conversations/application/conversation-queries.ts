@@ -321,8 +321,9 @@ export async function loadConversationMessages(
   supabase: CurrentWorkspaceContext["supabase"],
   workspaceId: string,
   conversationId: string,
+  userId?: string,
 ): Promise<ConversationMessageRecord[]> {
-  const [messagesResult, retrievalResult, executionResult] = await Promise.all([
+  const [messagesResult, retrievalResult, executionResult, feedbackResult] = await Promise.all([
     supabase
       .from("messages")
       .select(
@@ -347,6 +348,14 @@ export async function loadConversationMessages(
       .eq("workspace_id", workspaceId)
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true }),
+    userId
+      ? supabase
+          .from("user_feedback")
+          .select("id, message_id, verdict, rating, correction_count, notes, estimated_minutes_saved")
+          .eq("workspace_id", workspaceId)
+          .eq("conversation_id", conversationId)
+          .eq("created_by", userId)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
   if (messagesResult.error) {
@@ -356,6 +365,9 @@ export async function loadConversationMessages(
     throw new Error(
       `No pudimos consultar las ejecuciones del equipo: ${executionResult.error.message}`,
     );
+  }
+  if (feedbackResult.error) {
+    throw new Error(`No pudimos consultar la evaluación de los mensajes: ${feedbackResult.error.message}`);
   }
 
   const executionRows = (executionResult.data ?? []) as unknown as Array<
@@ -533,6 +545,23 @@ export async function loadConversationMessages(
     handoffsByExecution.set(executionId, current);
   }
 
+  const feedbackByMessage = new Map(
+    (feedbackResult.data ?? []).map((row) => [
+      String(row.message_id),
+      {
+        id: String(row.id),
+        verdict: row.verdict as NonNullable<ConversationMessageRecord["feedback"]>["verdict"],
+        rating: Number(row.rating),
+        correctionCount: Number(row.correction_count ?? 0),
+        notes: String(row.notes ?? ""),
+        estimatedMinutesSaved:
+          row.estimated_minutes_saved === null
+            ? null
+            : Number(row.estimated_minutes_saved),
+      },
+    ]),
+  );
+
   const teamExecutionByMessage = new Map<
     string,
     NonNullable<ConversationMessageRecord["teamExecution"]>
@@ -621,6 +650,7 @@ export async function loadConversationMessages(
       }),
       retrievalSources: sourcesByMessage.get(id) ?? [],
       teamExecution: teamExecutionByMessage.get(id) ?? null,
+      feedback: feedbackByMessage.get(id) ?? null,
     };
   });
 }
@@ -703,7 +733,7 @@ export async function loadExecutableModels(
     .in("model_kind", ["chat", "reasoning", "multimodal"])
     .eq("ai_providers.status", "active")
     .eq("ai_providers.credential_status", "configured")
-    .in("ai_providers.provider_type", ["openai", "openrouter", "openai_compatible"])
+    .in("ai_providers.provider_type", ["openai", "gemini", "openrouter", "openai_compatible"])
     .order("display_name")
     .limit(500);
 

@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function LandingHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.05] bg-[#060a0f]/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8">
         <BrandMark />
 
@@ -16,19 +16,19 @@ export function LandingHeader() {
         >
           <Link
             href="#capacidades"
-            className="nexus-focus rounded-md text-sm text-slate-400 transition-colors hover:text-white"
+            className="nexus-focus rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Capacidades
           </Link>
           <Link
             href="#arquitectura"
-            className="nexus-focus rounded-md text-sm text-slate-400 transition-colors hover:text-white"
+            className="nexus-focus rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Arquitectura
           </Link>
           <Link
             href="/iniciar-sesion"
-            className="nexus-focus rounded-md text-sm text-slate-300 transition-colors hover:text-white"
+            className="nexus-focus rounded-md text-sm text-secondary-foreground transition-colors hover:text-foreground"
           >
             Iniciar sesión
           </Link>

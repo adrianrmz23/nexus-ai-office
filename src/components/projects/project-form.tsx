@@ -102,10 +102,10 @@ export function ProjectForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Identidad del proyecto</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Información principal
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Define cómo se identificará el proyecto dentro de la oficina y qué
             prioridad tendrá para los agentes.
           </p>
@@ -146,7 +146,7 @@ export function ProjectForm({
               maxLength={3000}
               className="min-h-32"
             />
-            <p className="text-xs leading-5 text-slate-600">
+            <p className="text-xs leading-5 text-muted-foreground/80">
               No incluyas contraseñas, claves privadas, tokens ni contenido de
               archivos .env.
             </p>
@@ -158,7 +158,7 @@ export function ProjectForm({
               id="icon"
               name="icon"
               defaultValue={values.icon}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {PROJECT_ICONS.map((icon) => (
@@ -171,7 +171,7 @@ export function ProjectForm({
 
           <div className="space-y-2">
             <Label htmlFor="color">Color de identificación</Label>
-            <div className="flex items-center gap-3 rounded-lg border border-input bg-white/[0.025] px-3 py-2">
+            <div className="flex items-center gap-3 rounded-lg border border-input bg-muted/35 px-3 py-2">
               <input
                 id="color"
                 name="color"
@@ -180,7 +180,7 @@ export function ProjectForm({
                 className="h-7 w-12 cursor-pointer rounded border-0 bg-transparent p-0"
                 aria-label="Color de identificación del proyecto"
               />
-              <span className="font-mono text-xs text-slate-500">
+              <span className="font-mono text-xs text-muted-foreground">
                 Se usará en tarjetas, actividad y relaciones.
               </span>
             </div>
@@ -192,7 +192,7 @@ export function ProjectForm({
               id="status"
               name="status"
               defaultValue={values.status}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {editableStatuses.map((status) => (
@@ -214,7 +214,7 @@ export function ProjectForm({
               id="priority"
               name="priority"
               defaultValue={values.priority}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
               required
             >
               {PROJECT_PRIORITIES.map((priority) => (
@@ -234,10 +234,10 @@ export function ProjectForm({
           </div>
           <div>
             <div className="nexus-kicker">Stack técnico</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">
+            <h2 className="mt-2 text-base font-semibold text-foreground">
               Tecnologías asignadas
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
               El equipo de agentes utilizará esta selección para especializar
               recomendaciones, contexto y herramientas.
             </p>
@@ -249,7 +249,7 @@ export function ProjectForm({
             {technologies.map((technology) => (
               <label
                 key={technology.id}
-                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.018] p-3.5 transition-colors hover:border-primary/20 hover:bg-primary/[0.025]"
+                className="nexus-focus flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/25 p-3.5 transition-colors hover:border-primary/20 hover:bg-primary/[0.025]"
               >
                 <input
                   type="checkbox"
@@ -264,10 +264,10 @@ export function ProjectForm({
                   aria-hidden="true"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-slate-200">
+                  <span className="block truncate text-sm font-medium text-foreground">
                     {technology.name}
                   </span>
-                  <span className="mt-1 block text-xs text-slate-600">
+                  <span className="mt-1 block text-xs text-muted-foreground/80">
                     {technology.version ? `${technology.version} · ` : ""}
                     {technology.status === "inactive" ? "Inactiva" : technology.category}
                   </span>
@@ -276,8 +276,8 @@ export function ProjectForm({
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-xl border border-dashed border-white/[0.08] bg-black/10 p-5">
-            <p className="text-sm leading-6 text-slate-500">
+          <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/45 p-5">
+            <p className="text-sm leading-6 text-muted-foreground">
               Todavía no hay tecnologías disponibles. Puedes guardar el proyecto
               sin stack y asignarlo después, o registrar primero el catálogo.
             </p>
@@ -294,10 +294,10 @@ export function ProjectForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Accesos y presupuesto</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Entornos del proyecto
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Registra únicamente enlaces descriptivos. Las credenciales y secretos
             deberán almacenarse más adelante en el módulo seguro de proveedores.
           </p>
@@ -358,7 +358,7 @@ export function ProjectForm({
               id="budgetCurrency"
               name="budgetCurrency"
               defaultValue={values.budgetCurrency}
-              className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground transition-colors hover:border-white/20"
+              className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors hover:border-primary/35"
             >
               <option value="MXN">MXN — Peso mexicano</option>
               <option value="USD">USD — Dólar estadounidense</option>
@@ -371,10 +371,10 @@ export function ProjectForm({
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div>
           <div className="nexus-kicker">Contexto permanente</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Reglas para los agentes
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Esta información se conservará como contexto estructurado del
             proyecto. No será mezclada con otros proyectos del workspace.
           </p>

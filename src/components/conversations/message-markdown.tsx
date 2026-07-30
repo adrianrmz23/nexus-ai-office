@@ -26,20 +26,20 @@ function inlineNodes(text: string): ReactNode[] {
       nodes.push(
         <code
           key={`inline-code-${key}`}
-          className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.88em] text-cyan-100/85"
+          className="rounded bg-muted/65 px-1.5 py-0.5 font-mono text-[0.88em] text-cyan-100/85"
         >
           {token.slice(1, -1)}
         </code>,
       );
     } else if (token.startsWith("**")) {
       nodes.push(
-        <strong key={`strong-${key}`} className="font-semibold text-slate-100">
+        <strong key={`strong-${key}`} className="font-semibold text-foreground">
           {token.slice(2, -2)}
         </strong>,
       );
     } else if (token.startsWith("*")) {
       nodes.push(
-        <em key={`em-${key}`} className="text-slate-200">
+        <em key={`em-${key}`} className="text-foreground">
           {token.slice(1, -1)}
         </em>,
       );
@@ -184,7 +184,7 @@ export function MessageMarkdown({
   return (
     <div
       className={cn(
-        "break-words text-sm text-slate-300",
+        "break-words text-sm text-secondary-foreground",
         compact ? "space-y-1.5 text-[0.7rem] leading-5" : "space-y-3 leading-7",
       )}
     >
@@ -192,10 +192,10 @@ export function MessageMarkdown({
         const key = `${block.type}-${index}`;
         if (block.type === "heading") {
           const classes = compact
-            ? "font-semibold text-slate-300"
+            ? "font-semibold text-secondary-foreground"
             : block.level <= 2
-              ? "pt-1 text-base font-semibold text-white"
-              : "pt-1 text-sm font-semibold text-slate-100";
+              ? "pt-1 text-base font-semibold text-foreground"
+              : "pt-1 text-sm font-semibold text-foreground";
           return (
             <div key={key} role="heading" aria-level={block.level} className={classes}>
               {inlineNodes(block.text)}
@@ -231,7 +231,7 @@ export function MessageMarkdown({
           return (
             <blockquote
               key={key}
-              className="border-l-2 border-primary/25 pl-3 text-slate-400"
+              className="border-l-2 border-primary/25 pl-3 text-muted-foreground"
             >
               {inlineNodes(block.text)}
             </blockquote>
@@ -239,9 +239,9 @@ export function MessageMarkdown({
         }
         if (block.type === "code") {
           return (
-            <div key={key} className="overflow-hidden rounded-xl border border-white/[0.06] bg-black/30">
+            <div key={key} className="overflow-hidden rounded-xl border border-border bg-muted/65">
               {block.language && (
-                <div className="border-b border-white/[0.05] px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-slate-600">
+                <div className="border-b border-border px-3 py-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground/80">
                   {block.language}
                 </div>
               )}
@@ -251,7 +251,7 @@ export function MessageMarkdown({
             </div>
           );
         }
-        return <hr key={key} className="border-white/[0.06]" />;
+        return <hr key={key} className="border-border" />;
       })}
     </div>
   );

@@ -1,4 +1,5 @@
 import type { CurrentWorkspaceContext } from "@/modules/workspaces/application/require-current-workspace";
+import { calculateModelHistoryScore } from "@/modules/models/domain/model-history-score";
 import type {
   AIModelRecord,
   AIProviderRecord,
@@ -29,13 +30,16 @@ export async function loadProviders(
   supabase: CurrentWorkspaceContext["supabase"],
   workspaceId: string,
 ): Promise<AIProviderRecord[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("ai_providers")
     .select(
       "id, workspace_id, slug, display_name, provider_type, base_url, icon, color, status, credential_status, credential_last_four, health_status, last_checked_at, last_error, notes, created_at, updated_at, archived_at",
     )
     .eq("workspace_id", workspaceId)
     .order("display_name");
+  if (error) {
+    throw new Error(`No pudimos cargar los proveedores: ${error.message}`);
+  }
   return (data ?? []) as AIProviderRecord[];
 }
 
@@ -51,11 +55,21 @@ export async function loadModelCatalog(
     )
     .eq("workspace_id", workspaceId)
     .order("display_name")
-    .limit(1000);
+    .limit(2000);
   if (filters?.providerId) query = query.eq("provider_id", filters.providerId);
   if (filters?.status && filters.status !== "all") query = query.eq("status", filters.status);
-  if (filters?.search) query = query.ilike("display_name", `%${filters.search}%`);
-  const { data } = await query;
+  if (filters?.search) {
+    const safeSearch = filters.search.replace(/[,%()"'\\]/g, " ").trim();
+    if (safeSearch) {
+      query = query.or(
+        `display_name.ilike.%${safeSearch}%,api_identifier.ilike.%${safeSearch}%`,
+      );
+    }
+  }
+  const { data, error } = await query;
+  if (error) {
+    throw new Error(`No pudimos cargar el catálogo de modelos: ${error.message}`);
+  }
   const rawModels = (data ?? []) as unknown as RawModel[];
   if (!rawModels.length) return [];
   const modelIds = rawModels.map((model) => model.id);
@@ -78,6 +92,11 @@ export async function loadModelCatalog(
       .eq("workspace_id", workspaceId)
       .in("model_id", modelIds),
   ]);
+  const relationError =
+    capabilitiesResult.error ?? taskScoresResult.error ?? technologyScoresResult.error;
+  if (relationError) {
+    throw new Error(`No pudimos cargar las evaluaciones de modelos: ${relationError.message}`);
+  }
   const capabilitiesByModel = new Map<string, ModelCapabilitiesRecord>();
   for (const item of capabilitiesResult.data ?? []) {
     capabilitiesByModel.set(item.model_id, item as ModelCapabilitiesRecord);
@@ -117,7 +136,7 @@ export async function loadRecommendationCatalog(
   workspaceId: string,
   input: { taskType: ModelTaskType; technologyIds: string[] },
 ): Promise<AIModelRecord[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("ai_models")
     .select(
       "id, workspace_id, provider_id, display_name, api_identifier, model_kind, status, context_window, max_output_tokens, input_cost_per_million, output_cost_per_million, currency, pricing_notes, last_reviewed_at, last_synced_at, source_metadata, notes, created_at, updated_at, archived_at, ai_providers!inner(id, display_name, provider_type, color, status, health_status)",
@@ -129,11 +148,15 @@ export async function loadRecommendationCatalog(
     .order("display_name")
     .limit(500);
 
+  if (error) {
+    throw new Error(`No pudimos cargar modelos recomendables: ${error.message}`);
+  }
+
   const rawModels = (data ?? []) as unknown as RawModel[];
   if (!rawModels.length) return [];
   const modelIds = rawModels.map((model) => model.id);
 
-  const [capabilitiesResult, taskScoresResult, technologyScoresResult] = await Promise.all([
+  const [capabilitiesResult, taskScoresResult, technologyScoresResult, feedbackResult] = await Promise.all([
     supabase
       .from("model_capabilities")
       .select(
@@ -157,6 +180,12 @@ export async function loadRecommendationCatalog(
       : Promise.resolve({
           data: [] as Array<{ model_id: string; technology_id: string; score: number }>,
         }),
+    supabase
+      .from("user_feedback")
+      .select("model_id, rating, verdict, correction_count")
+      .eq("workspace_id", workspaceId)
+      .in("model_id", modelIds)
+      .gte("created_at", new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
   const capabilitiesByModel = new Map<string, ModelCapabilitiesRecord>();
@@ -175,11 +204,23 @@ export async function loadRecommendationCatalog(
     current[item.technology_id] = item.score;
     technologyScoresByModel.set(item.model_id, current);
   }
+  const feedbackByModel = new Map<string, Array<{ rating: number; verdict: "accepted" | "partial" | "rejected"; correctionCount: number }>>();
+  for (const item of feedbackResult.data ?? []) {
+    if (!item.model_id) continue;
+    const current = feedbackByModel.get(item.model_id) ?? [];
+    current.push({
+      rating: Number(item.rating),
+      verdict: item.verdict as "accepted" | "partial" | "rejected",
+      correctionCount: Number(item.correction_count ?? 0),
+    });
+    feedbackByModel.set(item.model_id, current);
+  }
 
   return rawModels.map((raw) => {
     const provider = Array.isArray(raw.ai_providers) ? raw.ai_providers[0] : raw.ai_providers;
     const { ai_providers: _ignored, ...model } = raw;
     void _ignored;
+    const history = calculateModelHistoryScore(feedbackByModel.get(model.id) ?? []);
     return {
       ...model,
       input_cost_per_million:
@@ -190,6 +231,8 @@ export async function loadRecommendationCatalog(
       capabilities: capabilitiesByModel.get(model.id) ?? null,
       taskScores: taskScoresByModel.get(model.id) ?? {},
       technologyScores: technologyScoresByModel.get(model.id) ?? {},
+      historyScore: history.score,
+      historySamples: history.samples,
     } as AIModelRecord;
   });
 }

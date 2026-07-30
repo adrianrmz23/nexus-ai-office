@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 
 import { MessageMarkdown } from "@/components/conversations/message-markdown";
+import { MessageFeedback } from "@/components/analytics/message-feedback";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
@@ -296,6 +297,7 @@ export function ChatWorkspace({
         })),
         retrievalSources: [],
         teamExecution: null,
+        feedback: null,
       },
       {
         id: optimisticAssistantId,
@@ -342,6 +344,7 @@ export function ChatWorkspace({
                 handoffs: [],
               }
             : null,
+        feedback: null,
         pending: true,
       },
     ]);
@@ -677,14 +680,14 @@ export function ChatWorkspace({
   return (
     <div className="grid min-h-[calc(100vh-9rem)] gap-4 xl:grid-cols-[minmax(0,1fr)_19rem]">
       <section className="nexus-panel flex min-h-[42rem] min-w-0 flex-col overflow-hidden rounded-2xl">
-        <header className="border-b border-white/[0.055] p-4 sm:p-5">
+        <header className="border-b border-border p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="nexus-kicker">Conversación activa</div>
-              <h1 className="mt-2 truncate text-xl font-semibold text-white">
+              <h1 className="mt-2 truncate text-xl font-semibold text-foreground">
                 {conversation.title}
               </h1>
-              <div className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+              <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground/80">
                 <span
                   className="size-2 rounded-full"
                   style={{ backgroundColor: conversation.projectColor }}
@@ -705,7 +708,7 @@ export function ChatWorkspace({
                   }
                 }}
                 disabled={isStreaming}
-                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground"
+                className="nexus-focus h-10 rounded-lg border border-input bg-card px-3 text-xs text-foreground"
               >
                 <option value="individual">Agente individual</option>
                 <option value="team">Equipo coordinado</option>
@@ -714,7 +717,7 @@ export function ChatWorkspace({
                 value={taskType}
                 onChange={(event) => setTaskType(event.target.value as ModelTaskType)}
                 disabled={isStreaming}
-                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground"
+                className="nexus-focus h-10 rounded-lg border border-input bg-card px-3 text-xs text-foreground"
               >
                 {MODEL_TASK_TYPES.map((task) => (
                   <option key={task} value={task}>
@@ -726,7 +729,7 @@ export function ChatWorkspace({
                 value={agentId}
                 onChange={(event) => setAgentId(event.target.value)}
                 disabled={isStreaming || mode === "team"}
-                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                className="nexus-focus h-10 rounded-lg border border-input bg-card px-3 text-xs text-foreground disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {agents.map((agent) => (
                   <option key={agent.id} value={agent.id}>
@@ -738,7 +741,7 @@ export function ChatWorkspace({
                 value={modelId}
                 onChange={(event) => setModelId(event.target.value)}
                 disabled={isStreaming}
-                className="nexus-focus h-10 rounded-lg border border-input bg-[#0b1219] px-3 text-xs text-foreground"
+                className="nexus-focus h-10 rounded-lg border border-input bg-card px-3 text-xs text-foreground"
               >
                 <option value="">Selección automática</option>
                 {models.map((model) => (
@@ -763,10 +766,10 @@ export function ChatWorkspace({
             <div className="grid min-h-80 place-items-center text-center">
               <div>
                 <Sparkles className="mx-auto size-7 text-primary/45" />
-                <h2 className="mt-4 text-base font-semibold text-slate-200">
+                <h2 className="mt-4 text-base font-semibold text-foreground">
                   Inicia una sesión de trabajo
                 </h2>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground/80">
                   NEXUS incorporará las instrucciones, reglas, stack y equipo del proyecto en cada ejecución.
                 </p>
               </div>
@@ -796,13 +799,13 @@ export function ChatWorkspace({
                   className={cn(
                     "max-w-[92%] rounded-2xl border px-4 py-3 sm:max-w-[82%]",
                     userMessage
-                      ? "border-primary/10 bg-primary/[0.07] text-slate-200"
-                      : "border-white/[0.06] bg-black/15 text-slate-300",
+                      ? "border-primary/10 bg-primary/[0.07] text-foreground"
+                      : "border-border bg-muted/50 text-secondary-foreground",
                   )}
                 >
                   {!userMessage && (
-                    <div className="mb-2 flex flex-wrap items-center gap-2 text-[0.65rem] text-slate-600">
-                      <span className="font-medium text-slate-400">
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-[0.65rem] text-muted-foreground/80">
+                      <span className="font-medium text-muted-foreground">
                         {message.agent?.name ?? "Agente NEXUS"}
                       </span>
                       {message.model && (
@@ -832,7 +835,7 @@ export function ChatWorkspace({
                       {message.attachments.map((attachment) => (
                         <span
                           key={attachment.id}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-black/15 px-2.5 py-1.5 text-[0.65rem] text-slate-500"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5 text-[0.65rem] text-muted-foreground"
                         >
                           <FileCode2 className="size-3" />
                           {attachment.file_name} · {formatBytes(attachment.size_bytes)}
@@ -850,10 +853,10 @@ export function ChatWorkspace({
                         {message.retrievalSources.map((source) => (
                           <div
                             key={`${source.sourceType}-${source.sourceId}`}
-                            className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2 text-xs"
+                            className="rounded-lg border border-border bg-muted/45 px-3 py-2 text-xs"
                           >
-                            <div className="font-medium text-slate-300">{source.title}</div>
-                            <div className="mt-1 text-[0.62rem] text-slate-600">
+                            <div className="font-medium text-secondary-foreground">{source.title}</div>
+                            <div className="mt-1 text-[0.62rem] text-muted-foreground/80">
                               {source.fileName ?? (source.sourceType === "memory" ? "Memoria estructurada" : "Documento")}
                               {source.chunkIndex !== null ? ` · fragmento ${source.chunkIndex + 1}` : ""}
                               {` · ${Math.round(source.score * 100)}%`}
@@ -879,17 +882,17 @@ export function ChatWorkspace({
                                 ? "El líder está consolidando"
                                 : `${message.teamExecution.handoffs.length} handoff${message.teamExecution.handoffs.length === 1 ? "" : "s"} registrado${message.teamExecution.handoffs.length === 1 ? "" : "s"}`}
                         </span>
-                        <span className="text-[0.6rem] uppercase tracking-[0.16em] text-slate-600">
+                        <span className="text-[0.6rem] uppercase tracking-[0.16em] text-muted-foreground/80">
                           {message.teamExecution.status}
                         </span>
                       </summary>
 
                       <div className="mt-3 space-y-3">
-                        <div className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2 text-xs leading-5 text-slate-500">
-                          <div className="font-medium text-slate-300">Plan operativo</div>
+                        <div className="rounded-lg border border-border bg-muted/45 px-3 py-2 text-xs leading-5 text-muted-foreground">
+                          <div className="font-medium text-secondary-foreground">Plan operativo</div>
                           <div className="mt-1">{message.teamExecution.summary}</div>
                           {message.teamExecution.generatedBy && (
-                            <div className="mt-1 text-[0.6rem] text-slate-700">
+                            <div className="mt-1 text-[0.6rem] text-muted-foreground/60">
                               {message.teamExecution.generatedBy === "orchestrator"
                                 ? "Plan generado por el orquestador"
                                 : "Plan determinista de respaldo"}
@@ -900,13 +903,13 @@ export function ChatWorkspace({
                         {message.teamExecution.handoffs.map((handoff) => (
                           <div
                             key={handoff.id}
-                            className="rounded-lg border border-white/[0.05] bg-black/10 px-3 py-2.5"
+                            className="rounded-lg border border-border bg-muted/45 px-3 py-2.5"
                           >
                             <div className="flex flex-wrap items-center gap-2 text-xs">
-                              <span className="font-medium text-slate-400">
+                              <span className="font-medium text-muted-foreground">
                                 {handoff.sourceAgent?.name ?? "Orquestador"}
                               </span>
-                              <ArrowRight className="size-3 text-slate-700" />
+                              <ArrowRight className="size-3 text-muted-foreground/60" />
                               <span
                                 className="font-medium"
                                 style={{ color: handoff.targetAgent?.color ?? "#55e6c1" }}
@@ -923,15 +926,15 @@ export function ChatWorkspace({
                                 <TriangleAlert className="size-3 text-rose-300/70" />
                               )}
                             </div>
-                            <div className="mt-1.5 text-[0.68rem] leading-5 text-slate-600">
+                            <div className="mt-1.5 text-[0.68rem] leading-5 text-muted-foreground/80">
                               {handoff.reason}
                             </div>
                             {handoff.resultSummary && (
-                              <div className="mt-2 rounded-md border border-white/[0.04] bg-black/10 px-2.5 py-2 text-slate-500">
+                              <div className="mt-2 rounded-md border border-border bg-muted/45 px-2.5 py-2 text-muted-foreground">
                                 <MessageMarkdown content={handoff.resultSummary} compact />
                               </div>
                             )}
-                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.58rem] text-slate-700">
+                            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.58rem] text-muted-foreground/60">
                               {handoff.model && (
                                 <span>
                                   {handoff.model.providerName} · {handoff.model.displayName}
@@ -949,7 +952,7 @@ export function ChatWorkspace({
 
                         {(message.teamExecution.totalInputTokens !== null ||
                           message.teamExecution.durationMs !== null) && (
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-white/[0.05] pt-2 text-[0.62rem] text-slate-600">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-2 text-[0.62rem] text-muted-foreground/80">
                             <span>
                               Entrada total: {message.teamExecution.totalInputTokens ?? "—"}
                             </span>
@@ -974,34 +977,37 @@ export function ChatWorkspace({
                     </div>
                   )}
                   {!userMessage && message.status === "completed" && message.content && !message.id.startsWith("assistant-") ? (
-                    <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.05] pt-3">
+                    <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                       <Link
                         href={`/app/tareas/nueva?project=${conversation.projectId}&conversation=${conversation.id}&message=${message.id}`}
-                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-primary/20 hover:text-primary"
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-primary/20 hover:text-primary"
                       >
                         <ListTodo className="size-3.5" /> Crear tarea
                       </Link>
                       <Link
                         href={`/app/artefactos/nuevo?project=${conversation.projectId}&conversation=${conversation.id}&message=${message.id}`}
-                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-primary/20 hover:text-primary"
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-primary/20 hover:text-primary"
                       >
                         <PackagePlus className="size-3.5" /> Guardar artefacto
                       </Link>
                       <Link
                         href={`/app/proyectos/${conversation.projectId}/registro?conversation=${conversation.id}&message=${message.id}&agent=${message.agent_id ?? ""}`}
-                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-violet-400/20 hover:text-violet-300"
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-violet-400/20 hover:text-violet-300"
                       >
                         <Gavel className="size-3.5" /> Registrar decisión
                       </Link>
                       <Link
                         href={`/app/proyectos/${conversation.projectId}/registro?conversation=${conversation.id}&message=${message.id}&agent=${message.agent_id ?? ""}#errores`}
-                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.65rem] font-medium text-slate-400 hover:border-rose-400/20 hover:text-rose-300"
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-rose-400/20 hover:text-rose-300"
                       >
                         <Bug className="size-3.5" /> Error y solución
                       </Link>
                     </div>
                   ) : null}
-                  <div className="mt-2 text-right text-[0.58rem] text-slate-700">
+                  {!userMessage && message.status === "completed" && message.content && !message.id.startsWith("assistant-") ? (
+                    <MessageFeedback messageId={message.id} initialFeedback={message.feedback} />
+                  ) : null}
+                  <div className="mt-2 text-right text-[0.58rem] text-muted-foreground/60">
                     {formatTime(message.created_at)}
                   </div>
                 </div>
@@ -1011,7 +1017,7 @@ export function ChatWorkspace({
           <div ref={endRef} />
         </div>
 
-        <form onSubmit={sendMessage} className="border-t border-white/[0.055] p-4 sm:p-5">
+        <form onSubmit={sendMessage} className="border-t border-border p-4 sm:p-5">
           {error && (
             <div className="mb-3 flex items-start justify-between gap-3 rounded-xl border border-rose-400/15 bg-rose-400/[0.04] px-3.5 py-3 text-xs leading-5 text-rose-200/75">
               <span>{error}</span>
@@ -1030,7 +1036,7 @@ export function ChatWorkspace({
                 >
                   <FileCode2 className="size-3.5" />
                   <span className="max-w-48 truncate">{attachment.fileName}</span>
-                  <span className="text-slate-600">{formatBytes(attachment.sizeBytes)}</span>
+                  <span className="text-muted-foreground/80">{formatBytes(attachment.sizeBytes)}</span>
                   <button
                     type="button"
                     onClick={() => removeAttachment(index)}
@@ -1043,7 +1049,7 @@ export function ChatWorkspace({
             </div>
           )}
 
-          <div className="rounded-2xl border border-white/[0.07] bg-black/15 p-2 focus-within:border-primary/25">
+          <div className="rounded-2xl border border-border bg-muted/50 p-2 focus-within:border-primary/25">
             <textarea
               value={content}
               onChange={(event) => setContent(event.target.value)}
@@ -1051,7 +1057,7 @@ export function ChatWorkspace({
               rows={4}
               maxLength={100_000}
               placeholder="Describe la tarea, pega el error o adjunta archivos de texto y código..."
-              className="nexus-scrollbar min-h-24 w-full resize-y bg-transparent px-2 py-2 text-sm leading-6 text-slate-200 outline-none placeholder:text-slate-700"
+              className="nexus-scrollbar min-h-24 w-full resize-y bg-transparent px-2 py-2 text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground/60"
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
@@ -1059,7 +1065,7 @@ export function ChatWorkspace({
                 }
               }}
             />
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.05] px-1 pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-1 pt-2">
               <div className="flex items-center gap-2">
                 <input
                   ref={fileInputRef}
@@ -1078,7 +1084,7 @@ export function ChatWorkspace({
                 >
                   <Paperclip /> Adjuntar
                 </Button>
-                <span className="hidden text-[0.62rem] text-slate-700 sm:inline">
+                <span className="hidden text-[0.62rem] text-muted-foreground/60 sm:inline">
                   Texto/código · 256 KB por archivo
                 </span>
               </div>
@@ -1103,10 +1109,10 @@ export function ChatWorkspace({
             <Bot className="size-4 text-primary/70" />
             <div className="nexus-kicker">Agente activo</div>
           </div>
-          <div className="mt-4 text-sm font-semibold text-slate-200">
+          <div className="mt-4 text-sm font-semibold text-foreground">
             {selectedAgent?.name ?? "Sin agente"}
           </div>
-          <div className="mt-1 text-xs text-slate-600">
+          <div className="mt-1 text-xs text-muted-foreground/80">
             {selectedAgent?.role ?? "Selecciona un especialista"}
           </div>
         </section>
@@ -1116,10 +1122,10 @@ export function ChatWorkspace({
             <Cpu className="size-4 text-primary/70" />
             <div className="nexus-kicker">Modelo</div>
           </div>
-          <div className="mt-4 text-sm font-semibold text-slate-200">
+          <div className="mt-4 text-sm font-semibold text-foreground">
             {selectedModel?.displayName ?? "Selección automática"}
           </div>
-          <div className="mt-1 text-xs text-slate-600">
+          <div className="mt-1 text-xs text-muted-foreground/80">
             {selectedModel?.providerName ?? "El recomendador resolverá el modelo"}
           </div>
         </section>
@@ -1131,22 +1137,22 @@ export function ChatWorkspace({
           </div>
           <dl className="mt-4 space-y-3 text-xs">
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">Entrada</dt>
-              <dd className="text-slate-300">{usage.inputTokens ?? "—"}</dd>
+              <dt className="text-muted-foreground/80">Entrada</dt>
+              <dd className="text-secondary-foreground">{usage.inputTokens ?? "—"}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">Salida</dt>
-              <dd className="text-slate-300">{usage.outputTokens ?? "—"}</dd>
+              <dt className="text-muted-foreground/80">Salida</dt>
+              <dd className="text-secondary-foreground">{usage.outputTokens ?? "—"}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">Costo</dt>
-              <dd className="text-slate-300">
+              <dt className="text-muted-foreground/80">Costo</dt>
+              <dd className="text-secondary-foreground">
                 {formatCost(usage.estimatedCost, usage.currency)}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-600">Duración</dt>
-              <dd className="text-slate-300">{formatDuration(usage.durationMs) || "—"}</dd>
+              <dt className="text-muted-foreground/80">Duración</dt>
+              <dd className="text-secondary-foreground">{formatDuration(usage.durationMs) || "—"}</dd>
             </div>
           </dl>
         </section>

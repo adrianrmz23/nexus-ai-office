@@ -45,10 +45,10 @@ export default async function NewProjectPage({
     <div className="mx-auto max-w-5xl pb-20 lg:pb-0">
       <div>
         <div className="nexus-kicker">Gestión operativa</div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
           Nuevo proyecto
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           Crea un espacio aislado para su stack, reglas, entornos y memoria futura.
         </p>
       </div>

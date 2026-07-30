@@ -156,6 +156,8 @@ export type AIModelRecord = {
   capabilities?: ModelCapabilitiesRecord | null;
   taskScores?: Partial<Record<ModelTaskType, number>>;
   technologyScores?: Record<string, number>;
+  historyScore?: number;
+  historySamples?: number;
 };
 
 export type ModelPreferenceRecord = {

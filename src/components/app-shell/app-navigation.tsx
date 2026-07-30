@@ -96,13 +96,13 @@ const navigation: NavigationItem[] = [
     label: "Analítica",
     href: "/app/analitica",
     icon: ChartNoAxesCombined,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Configuración",
     href: "/app/configuracion",
     icon: Settings2,
-    enabled: false,
+    enabled: true,
   },
 ];
 
@@ -127,7 +127,7 @@ export function DesktopAppNavigation() {
             return (
               <div
                 key={item.label}
-                className="flex h-10 cursor-not-allowed items-center gap-3 rounded-lg px-3 text-sm text-slate-700"
+                className="flex h-10 cursor-not-allowed items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground/60"
                 title="Este módulo se habilitará en los siguientes bloques"
                 aria-disabled="true"
               >
@@ -146,7 +146,7 @@ export function DesktopAppNavigation() {
                 "nexus-focus flex h-10 items-center gap-3 rounded-lg border px-3 text-sm font-medium transition-colors",
                 active
                   ? "border-primary/10 bg-primary/[0.065] text-primary"
-                  : "border-transparent text-slate-500 hover:bg-white/[0.035] hover:text-slate-200",
+                  : "border-transparent text-muted-foreground hover:bg-muted/70 hover:text-foreground",
               )}
             >
               <item.icon className="size-4" />
@@ -179,7 +179,7 @@ export function MobileAppNavigation() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "nexus-focus flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2",
-              active ? "text-primary" : "text-slate-600",
+              active ? "text-primary" : "text-muted-foreground/80",
             )}
           >
             <item.icon className="size-4" />

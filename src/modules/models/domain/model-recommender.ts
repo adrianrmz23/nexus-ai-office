@@ -100,7 +100,7 @@ export function recommendModels(
         requiredCapability(caps?.supports_tools, input.requiresTools),
         requiredCapability(caps?.supports_files, input.requiresFiles),
       ].reduce((sum, value) => sum + value, 0) / 3;
-      const history = 50;
+      const history = model.historyScore ?? 50;
       const cost = costScore(model, input.budgetProfile);
       const speedBase = neutral(caps?.speed_score);
       const speed = input.speedPreference === "fast" ? speedBase : (speedBase + 60) / 2;
@@ -123,6 +123,7 @@ export function recommendModels(
         model.context_window,
         model.input_cost_per_million,
         model.output_cost_per_million,
+        (model.historySamples ?? 0) > 0 ? model.historyScore : null,
       ].filter((value) => value !== null && value !== undefined).length;
       const reasons: string[] = [];
       if (task >= 75) reasons.push(`Alta puntuación para la tarea: ${Math.round(task)}/100.`);
@@ -131,6 +132,7 @@ export function recommendModels(
       if (context >= 90 && input.estimatedContextTokens > 0) reasons.push("El contexto estimado cabe con margen.");
       if (input.requiresVision && caps?.supports_vision === true) reasons.push("Admite análisis visual.");
       if (input.requiresTools && caps?.supports_tools === true) reasons.push("Admite herramientas.");
+      if ((model.historySamples ?? 0) >= 3 && history >= 75) reasons.push(`Buen historial observado: ${Math.round(history)}/100.`);
       if (!reasons.length) reasons.push("Resultado equilibrado con los datos disponibles; conviene revisar sus puntuaciones.");
       return {
         model,

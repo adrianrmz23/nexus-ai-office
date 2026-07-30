@@ -30,8 +30,8 @@ export default async function NewAgentPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto max-w-5xl pb-20 lg:pb-0">
       <div className="nexus-kicker">Equipo especializado</div>
-      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">Crear agente</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+      <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">Crear agente</h1>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
         Configura un especialista reutilizable con instrucciones, tecnologías,
         permisos y colaboradores.
       </p>

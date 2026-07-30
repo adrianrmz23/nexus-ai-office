@@ -19,25 +19,25 @@ export function MemoryCard({ memory }: { memory: MemoryRecord }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-slate-100">{memory.title}</h3>
-            <span className="rounded-full border border-white/[0.06] px-2 py-0.5 text-[0.6rem] text-slate-500">
+            <h3 className="text-sm font-semibold text-foreground">{memory.title}</h3>
+            <span className="rounded-full border border-border px-2 py-0.5 text-[0.6rem] text-muted-foreground">
               {MEMORY_STATUS_LABELS[memory.status]}
             </span>
           </div>
-          <div className="mt-2 text-xs text-slate-600">
+          <div className="mt-2 text-xs text-muted-foreground/80">
             {MEMORY_TYPE_LABELS[memory.memory_type]} · {MEMORY_SCOPE_LABELS[memory.scope_type]} · Importancia {memory.importance}
           </div>
         </div>
       </div>
 
-      <p className="mt-4 line-clamp-5 whitespace-pre-wrap text-sm leading-6 text-slate-500">
+      <p className="mt-4 line-clamp-5 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {memory.content}
       </p>
-      <div className="mt-3 text-xs text-slate-700">
+      <div className="mt-3 text-xs text-muted-foreground/60">
         {memory.project?.name ?? "Disponible para toda la oficina"}
       </div>
 
-      <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-white/[0.05] pt-4">
+      <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-border pt-4">
         {memory.status === "archived" ? (
           <form action={setMemoryStatus}>
             <input type="hidden" name="memoryId" value={memory.id} />

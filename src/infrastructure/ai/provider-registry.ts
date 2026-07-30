@@ -35,10 +35,14 @@ export function createModelAdapter(input: {
   apiKey: string;
   appUrl?: string;
 }): ModelAdapter {
-  if (input.type === "anthropic" || input.type === "gemini") {
+  if (input.type === "anthropic") {
     throw new Error(
-      "Este proveedor todavía no tiene ejecución de chat habilitada en el Bloque 06.",
+      "Anthropic todavía no tiene ejecución de chat habilitada.",
     );
+  }
+
+  if (input.type === "gemini") {
+    return new GeminiAdapter(input.baseUrl, input.apiKey);
   }
 
   return new OpenAICompatibleAdapter({

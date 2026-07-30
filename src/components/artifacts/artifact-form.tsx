@@ -57,21 +57,21 @@ export function ArtifactForm({ action, projects, tasks, agents, initialValues, e
           <div className="grid size-10 place-items-center rounded-xl border border-primary/10 bg-primary/[0.04]"><FileCode2 className="size-4 text-primary/75" /></div>
           <div>
             <div className="nexus-kicker">Artefacto versionado</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">Identidad y procedencia</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">El contenido queda vinculado al proyecto, tarea, conversación y agente que lo originó.</p>
+            <h2 className="mt-2 text-base font-semibold text-foreground">Identidad y procedencia</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">El contenido queda vinculado al proyecto, tarea, conversación y agente que lo originó.</p>
           </div>
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="projectId">Proyecto</Label>
-            <select id="projectId" name="projectId" value={projectId} onChange={(event) => setProjectId(event.target.value)} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground" required>
+            <select id="projectId" name="projectId" value={projectId} onChange={(event) => setProjectId(event.target.value)} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground" required>
               {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="artifactType">Tipo</Label>
-            <select id="artifactType" name="artifactType" defaultValue={initialValues.artifactType} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+            <select id="artifactType" name="artifactType" defaultValue={initialValues.artifactType} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
               {ARTIFACT_TYPES.map((type) => <option key={type} value={type}>{ARTIFACT_TYPE_LABELS[type]}</option>)}
             </select>
           </div>
@@ -81,14 +81,14 @@ export function ArtifactForm({ action, projects, tasks, agents, initialValues, e
           </div>
           <div className="space-y-2">
             <Label htmlFor="taskId">Tarea relacionada</Label>
-            <select id="taskId" name="taskId" defaultValue={initialValues.taskId} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+            <select id="taskId" name="taskId" defaultValue={initialValues.taskId} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
               <option value="">Sin tarea</option>
               {projectTasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="createdByAgentId">Agente autor</Label>
-            <select id="createdByAgentId" name="createdByAgentId" defaultValue={initialValues.createdByAgentId} className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+            <select id="createdByAgentId" name="createdByAgentId" defaultValue={initialValues.createdByAgentId} className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
               <option value="">Creado por el usuario</option>
               {projectAgents.map((agent) => <option key={agent.id} value={agent.id}>{agent.name}</option>)}
             </select>
@@ -110,7 +110,7 @@ export function ArtifactForm({ action, projects, tasks, agents, initialValues, e
 
       <section className="nexus-panel rounded-2xl p-5 sm:p-6">
         <div className="nexus-kicker">Versión 1</div>
-        <h2 className="mt-2 text-base font-semibold text-slate-100">Contenido completo</h2>
+        <h2 className="mt-2 text-base font-semibold text-foreground">Contenido completo</h2>
         <div className="mt-5">
           <Textarea id="content" name="content" defaultValue={initialValues.content} className="nexus-scrollbar min-h-[32rem] font-mono text-xs leading-6" maxLength={300_000} required />
         </div>

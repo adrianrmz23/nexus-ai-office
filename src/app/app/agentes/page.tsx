@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bot, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { AgentCard } from "@/components/agents/agent-card";
 import { AgentEmptyState } from "@/components/agents/agent-empty-state";
@@ -116,10 +116,10 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
       <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
           <div className="nexus-kicker">Equipo especializado</div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
             Agentes de la oficina
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Administra roles, especialidades, herramientas y relaciones de
             colaboración. Los agentes del sistema pueden personalizarse sin
             quedar ligados a un proveedor de IA.
@@ -145,9 +145,9 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
           { label: "Asignaciones activas", value: assignmentResult.data?.length ?? 0, detail: "Relaciones con proyectos" },
         ].map((item) => (
           <article key={item.label} className="nexus-panel rounded-2xl p-5">
-            <div className="font-mono text-[0.62rem] tracking-[0.14em] text-slate-600 uppercase">{item.label}</div>
-            <div className="mt-3 text-2xl font-semibold text-white">{item.value}</div>
-            <div className="mt-1 text-xs text-slate-600">{item.detail}</div>
+            <div className="font-mono text-[0.62rem] tracking-[0.14em] text-muted-foreground/80 uppercase">{item.label}</div>
+            <div className="mt-3 text-2xl font-semibold text-foreground">{item.value}</div>
+            <div className="mt-1 text-xs text-muted-foreground/80">{item.detail}</div>
           </article>
         ))}
       </section>
@@ -155,14 +155,14 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
       <section className="nexus-panel mt-5 rounded-2xl p-4 sm:p-5">
         <form className="grid gap-3 lg:grid-cols-[1fr_13rem_13rem_auto]">
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-600" />
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground/80" />
             <Input name="q" defaultValue={search} placeholder="Buscar por nombre..." className="pl-10" />
           </div>
-          <select name="role" defaultValue={role} aria-label="Filtrar por rol" className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+          <select name="role" defaultValue={role} aria-label="Filtrar por rol" className="nexus-focus h-11 rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
             <option value="all">Todos los roles</option>
             {AGENT_ROLES.map((item) => <option key={item} value={item}>{AGENT_ROLE_LABELS[item]}</option>)}
           </select>
-          <select name="status" defaultValue={status} aria-label="Filtrar por estado" className="nexus-focus h-11 rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground">
+          <select name="status" defaultValue={status} aria-label="Filtrar por estado" className="nexus-focus h-11 rounded-lg border border-input bg-card px-3.5 text-sm text-foreground">
             <option value="all">Todos los estados</option>
             {AGENT_STATUSES.map((item) => <option key={item} value={item}>{AGENT_STATUS_LABELS[item]}</option>)}
           </select>

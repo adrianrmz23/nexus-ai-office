@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { buttonVariants } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { Input } from "@/components/ui/input";
@@ -119,23 +118,23 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
         <div>
           <Link
             href={`/app/proyectos/${project.id}`}
-            className="nexus-focus inline-flex items-center gap-2 text-xs text-slate-500 hover:text-primary"
+            className="nexus-focus inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-primary"
           >
             <ArrowLeft className="size-3.5" />
             Volver al proyecto
           </Link>
           <div className="nexus-kicker mt-5">Equipo operativo</div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-white">
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-foreground">
             Agentes de {project.name}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Asigna especialistas y revisa la recomendación basada en el stack,
             las relaciones de dominio y los roles disponibles.
           </p>
         </div>
         <div className="rounded-xl border border-primary/10 bg-primary/[0.035] px-4 py-3 text-right">
-          <div className="font-mono text-[0.58rem] tracking-wider text-slate-600 uppercase">Equipo activo</div>
-          <div className="mt-1 text-xl font-semibold text-white">{assignments.length}</div>
+          <div className="font-mono text-[0.58rem] tracking-wider text-muted-foreground/80 uppercase">Equipo activo</div>
+          <div className="mt-1 text-xl font-semibold text-foreground">{assignments.length}</div>
         </div>
       </div>
 
@@ -150,10 +149,10 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
             <div className="nexus-kicker">Asignaciones actuales</div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">Equipo del proyecto</h2>
+            <h2 className="mt-2 text-base font-semibold text-foreground">Equipo del proyecto</h2>
           </div>
           {project.status === "archived" ? (
-            <span className="rounded-full border border-slate-400/10 bg-slate-400/[0.03] px-3 py-1.5 text-xs text-slate-500">
+            <span className="rounded-full border border-slate-400/10 bg-slate-400/[0.03] px-3 py-1.5 text-xs text-muted-foreground">
               Proyecto archivado
             </span>
           ) : null}
@@ -162,7 +161,7 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
         {assignments.length > 0 ? (
           <div className="mt-5 grid gap-3 lg:grid-cols-2">
             {assignments.map((assignment) => (
-              <article key={assignment.agent_id} className="rounded-xl border border-white/[0.06] bg-white/[0.018] p-4">
+              <article key={assignment.agent_id} className="rounded-xl border border-border bg-muted/25 p-4">
                 <div className="flex items-start gap-3">
                   <div
                     className="grid size-10 shrink-0 place-items-center rounded-xl border"
@@ -176,7 +175,7 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link href={`/app/agentes/${assignment.agent.id}`} className="truncate text-sm font-semibold text-slate-200 hover:text-primary">
+                      <Link href={`/app/agentes/${assignment.agent.id}`} className="truncate text-sm font-semibold text-foreground hover:text-primary">
                         {assignment.agent.name}
                       </Link>
                       {assignment.is_lead ? (
@@ -185,14 +184,14 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-1 text-xs text-slate-600">{AGENT_ROLE_LABELS[assignment.agent.role]}</div>
+                    <div className="mt-1 text-xs text-muted-foreground/80">{AGENT_ROLE_LABELS[assignment.agent.role]}</div>
                     {assignment.assignment_reason ? (
-                      <p className="mt-3 text-xs leading-5 text-slate-500">{assignment.assignment_reason}</p>
+                      <p className="mt-3 text-xs leading-5 text-muted-foreground">{assignment.assignment_reason}</p>
                     ) : null}
                   </div>
                 </div>
                 {canManage ? (
-                  <div className="mt-4 flex justify-end border-t border-white/[0.05] pt-3">
+                  <div className="mt-4 flex justify-end border-t border-border pt-3">
                     <form action={removeAgentFromProject}>
                       <input type="hidden" name="projectId" value={project.id} />
                       <input type="hidden" name="agentId" value={assignment.agent_id} />
@@ -211,9 +210,9 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
             ))}
           </div>
         ) : (
-          <div className="mt-5 rounded-xl border border-dashed border-white/[0.08] bg-black/10 p-6 text-center">
-            <Bot className="mx-auto size-5 text-slate-700" />
-            <p className="mt-3 text-sm text-slate-500">Este proyecto todavía no tiene agentes asignados.</p>
+          <div className="mt-5 rounded-xl border border-dashed border-border bg-muted/45 p-6 text-center">
+            <Bot className="mx-auto size-5 text-muted-foreground/60" />
+            <p className="mt-3 text-sm text-muted-foreground">Este proyecto todavía no tiene agentes asignados.</p>
           </div>
         )}
       </section>
@@ -225,8 +224,8 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
               <Sparkles className="size-4 text-primary/75" />
               <div className="nexus-kicker">Recomendación de equipo</div>
             </div>
-            <h2 className="mt-2 text-base font-semibold text-slate-100">Especialistas sugeridos</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            <h2 className="mt-2 text-base font-semibold text-foreground">Especialistas sugeridos</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               Esta primera versión utiliza reglas verificables de rol, tecnologías
               coincidentes y memoria habilitada. No ejecuta modelos ni genera costos.
             </p>
@@ -256,12 +255,12 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
                     {createElement(getAgentIcon(recommendation.agent.icon), { className: "size-4", "aria-hidden": true })}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-slate-200">{recommendation.agent.name}</div>
-                    <div className="mt-1 text-xs text-slate-600">{AGENT_ROLE_LABELS[recommendation.agent.role]}</div>
+                    <div className="truncate text-sm font-semibold text-foreground">{recommendation.agent.name}</div>
+                    <div className="mt-1 text-xs text-muted-foreground/80">{AGENT_ROLE_LABELS[recommendation.agent.role]}</div>
                   </div>
                   <span className="font-mono text-[0.58rem] text-primary/75">{recommendation.confidence}%</span>
                 </div>
-                <ul className="mt-4 space-y-2 text-xs leading-5 text-slate-500">
+                <ul className="mt-4 space-y-2 text-xs leading-5 text-muted-foreground">
                   {recommendation.reasons.map((reason) => (
                     <li key={reason} className="flex gap-2"><span className="mt-2 size-1 shrink-0 rounded-full bg-primary/60" />{reason}</li>
                   ))}
@@ -270,7 +269,7 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-sm leading-6 text-slate-600">
+          <p className="mt-5 text-sm leading-6 text-muted-foreground/80">
             No hay recomendaciones pendientes. El equipo actual ya cubre los perfiles disponibles.
           </p>
         )}
@@ -279,10 +278,10 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
       {canManage && availableAgents.length > 0 && project.status !== "archived" ? (
         <section className="nexus-panel mt-4 rounded-2xl p-5 sm:p-6">
           <div className="nexus-kicker">Asignación manual</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">Agregar un especialista</h2>
+          <h2 className="mt-2 text-base font-semibold text-foreground">Agregar un especialista</h2>
           <div className="mt-5 grid gap-3 lg:grid-cols-2">
             {availableAgents.map((agent) => (
-              <form key={agent.id} action={assignAgentToProject} className="rounded-xl border border-white/[0.06] bg-white/[0.018] p-4">
+              <form key={agent.id} action={assignAgentToProject} className="rounded-xl border border-border bg-muted/25 p-4">
                 <input type="hidden" name="projectId" value={project.id} />
                 <input type="hidden" name="agentId" value={agent.id} />
                 <div className="flex items-start gap-3">
@@ -293,15 +292,15 @@ export default async function ProjectAgentsPage({ params, searchParams }: PagePr
                     {createElement(getAgentIcon(agent.icon), { className: "size-4", "aria-hidden": true })}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-slate-200">{agent.name}</div>
-                    <div className="mt-1 text-xs text-slate-600">{AGENT_ROLE_LABELS[agent.role]}</div>
+                    <div className="truncate text-sm font-semibold text-foreground">{agent.name}</div>
+                    <div className="mt-1 text-xs text-muted-foreground/80">{AGENT_ROLE_LABELS[agent.role]}</div>
                   </div>
                 </div>
                 <div className="mt-4">
                   <Input name="assignmentReason" placeholder="Motivo opcional de la asignación" maxLength={1200} />
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                  <label className="flex items-center gap-2 text-xs text-slate-500">
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <input type="checkbox" name="isLead" className="size-4 accent-[#55e6c1]" />
                     Designar como líder
                   </label>

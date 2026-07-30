@@ -15,10 +15,10 @@ export default function ConversationsError({
     <div className="nexus-panel grid min-h-96 place-items-center rounded-2xl p-8 text-center">
       <div>
         <AlertTriangle className="mx-auto size-8 text-rose-300/70" />
-        <h2 className="mt-4 text-lg font-semibold text-slate-200">
+        <h2 className="mt-4 text-lg font-semibold text-foreground">
           No pudimos cargar las conversaciones
         </h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground/80">
           La información sigue almacenada. NEXUS recibió un error al recuperar el
           listado o alguna de sus relaciones.
         </p>

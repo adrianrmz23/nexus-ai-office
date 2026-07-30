@@ -25,10 +25,10 @@ export function MemoryForm({
         </div>
         <div>
           <div className="nexus-kicker">Memoria estructurada</div>
-          <h2 className="mt-2 text-base font-semibold text-slate-100">
+          <h2 className="mt-2 text-base font-semibold text-foreground">
             Guardar una decisión o preferencia
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Conserva únicamente información estable y útil. No guardes secretos ni datos temporales sin valor futuro.
           </p>
         </div>
@@ -41,7 +41,7 @@ export function MemoryForm({
             id="memory-scope"
             name="scopeType"
             defaultValue="project"
-            className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+            className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
           >
             <option value="project">Proyecto</option>
             <option value="global">Global de la oficina</option>
@@ -53,7 +53,7 @@ export function MemoryForm({
             id="memory-project"
             name="projectId"
             defaultValue={projects[0]?.id ?? ""}
-            className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+            className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
           >
             <option value="">Sin proyecto</option>
             {projects.map((project) => (
@@ -69,7 +69,7 @@ export function MemoryForm({
             id="memory-type"
             name="memoryType"
             defaultValue="decision"
-            className="nexus-focus h-11 w-full rounded-lg border border-input bg-[#0b1219] px-3.5 text-sm text-foreground"
+            className="nexus-focus h-11 w-full rounded-lg border border-input bg-card px-3.5 text-sm text-foreground"
           >
             {MEMORY_TYPES.map((type) => (
               <option key={type} value={type}>
