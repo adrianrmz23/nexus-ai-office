@@ -5,6 +5,7 @@ import { Archive, ArrowLeft, Boxes, CalendarClock, CheckCircle2, CirclePlay, Edi
 
 import { FormMessage } from "@/components/auth/form-message";
 import { MessageMarkdown } from "@/components/conversations/message-markdown";
+import { VoiceReader } from "@/components/voice/voice-reader";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { FormSubmitButton } from "@/components/ui/form-submit-button";
@@ -35,7 +36,7 @@ export default async function TaskDetailPage({ params, searchParams }: Props) {
       <Link href="/app/tareas" className={buttonVariants({ variant: "ghost", size: "sm" })}><ArrowLeft />Volver a tareas</Link>
       <div className="mt-5 flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
         <div><div className="nexus-kicker">{taskRecord.project?.name}</div><h1 className="mt-3 max-w-4xl text-3xl font-semibold tracking-[-0.035em] text-foreground">{taskRecord.title}</h1><div className="mt-3 flex flex-wrap gap-2 text-xs"><span className="rounded-full border border-primary/10 bg-primary/[0.04] px-2.5 py-1 text-primary/75">{TASK_STATUS_LABELS[taskRecord.status]}</span><span className="rounded-full border border-border px-2.5 py-1 text-muted-foreground">Prioridad {TASK_PRIORITY_LABELS[taskRecord.priority].toLowerCase()}</span><span className="rounded-full border border-border px-2.5 py-1 text-muted-foreground">{taskRecord.progress}%</span></div></div>
-        <div className="flex flex-wrap gap-2"><Link href={`/app/tareas/${taskRecord.id}/editar`} className={buttonVariants({ variant: "outline" })}><Edit3 />Editar</Link><Link href={`/app/artefactos/nuevo?project=${taskRecord.project_id}&task=${taskRecord.id}`} className={buttonVariants()}><Boxes />Crear artefacto</Link></div>
+        <div className="flex flex-wrap gap-2"><VoiceReader text={`${taskRecord.title}. ${taskRecord.description}. Criterios de aceptación: ${taskRecord.acceptance_criteria}`} label="Escuchar tarea" /><Link href={`/app/tareas/${taskRecord.id}/editar`} className={buttonVariants({ variant: "outline" })}><Edit3 />Editar</Link><Link href={`/app/artefactos/nuevo?project=${taskRecord.project_id}&task=${taskRecord.id}`} className={buttonVariants()}><Boxes />Crear artefacto</Link></div>
       </div>
       <div className="mt-7"><FormMessage error={messages.error} success={messages.success} /></div>
 

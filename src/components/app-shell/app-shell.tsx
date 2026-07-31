@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { ChevronDown, LogOut } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, LogOut, Mic2, Plus } from "lucide-react";
 
 import { signOut } from "@/app/app/actions";
 import {
@@ -8,21 +9,28 @@ import {
 } from "@/components/app-shell/app-navigation";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
+import { PendingReminderWatcher } from "@/components/voice/pending-reminder-watcher";
+import { VoiceSettingsBootstrap } from "@/components/voice/voice-settings-bootstrap";
 import { Button } from "@/components/ui/button";
+import type { VoiceSettingsRecord } from "@/modules/pendings/domain/pending";
 
 type AppShellProps = {
   children: ReactNode;
   workspaceName: string;
   userEmail: string;
+  voiceSettings: VoiceSettingsRecord;
 };
 
 export function AppShell({
   children,
   workspaceName,
   userEmail,
+  voiceSettings,
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background">
+      <VoiceSettingsBootstrap settings={voiceSettings} />
+      <PendingReminderWatcher />
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-sidebar-border bg-sidebar lg:flex lg:flex-col">
         <div className="flex h-[4.5rem] items-center border-b border-sidebar-border px-5">
           <BrandMark href="/app" />
@@ -82,11 +90,13 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/app/pendientes/nuevo" className="nexus-focus hidden h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium text-muted-foreground hover:text-primary md:inline-flex"><Plus className="size-3.5" />Capturar</Link>
+            <Link href="/app/hoy#voz" className="nexus-focus grid size-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground hover:text-primary" title="Hablar con NEXUS"><Mic2 className="size-4" /><span className="sr-only">Hablar con NEXUS</span></Link>
             <ThemeSwitcher compact />
             <div className="hidden items-center gap-2 rounded-full border border-primary/10 bg-primary/4 px-3 py-1.5 sm:flex">
               <span className="size-1.5 rounded-full bg-primary shadow-[0_0_9px_#55e6c1]" />
               <span className="font-mono text-[0.58rem] tracking-wider text-primary/80 uppercase">
-                Fase 8
+                Fase 9
               </span>
             </div>
           </div>

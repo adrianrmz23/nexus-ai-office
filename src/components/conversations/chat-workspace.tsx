@@ -34,10 +34,14 @@ import {
   PackagePlus,
   Gavel,
   Bug,
+  ClipboardCheck,
 } from "lucide-react";
 
 import { MessageMarkdown } from "@/components/conversations/message-markdown";
 import { MessageFeedback } from "@/components/analytics/message-feedback";
+import { VoiceReader } from "@/components/voice/voice-reader";
+import { VoiceDictationButton } from "@/components/voice/voice-dictation-button";
+import { loadBrowserVoiceSettings, speakText } from "@/components/voice/voice-runtime";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
@@ -186,6 +190,7 @@ export function ChatWorkspace({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const spokenMessageIds = useRef(new Set(initialMessages.map((message) => message.id)));
 
   const selectedAgent = useMemo(
     () => agents.find((agent) => agent.id === agentId) ?? null,
@@ -210,6 +215,20 @@ export function ChatWorkspace({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: isStreaming ? "auto" : "smooth" });
   }, [messages, isStreaming]);
+
+  useEffect(() => {
+    const settings = loadBrowserVoiceSettings();
+    if (!settings.auto_read_assistant) return;
+    const candidate = [...messages].reverse().find((message) =>
+      message.role === "assistant" &&
+      message.status === "completed" &&
+      Boolean(message.content) &&
+      !spokenMessageIds.current.has(message.id),
+    );
+    if (!candidate) return;
+    spokenMessageIds.current.add(candidate.id);
+    speakText(candidate.content, settings);
+  }, [messages]);
 
   async function handleFiles(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
@@ -1023,6 +1042,13 @@ export function ChatWorkspace({
                   )}
                   {!userMessage && message.status === "completed" && message.content && !message.id.startsWith("assistant-") ? (
                     <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+                      <VoiceReader text={message.content} label="Escuchar" compact />
+                      <Link
+                        href={`/app/pendientes/nuevo?conversation=${conversation.id}&message=${message.id}`}
+                        className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-primary/20 hover:text-primary"
+                      >
+                        <ClipboardCheck className="size-3.5" /> Crear pendiente
+                      </Link>
                       <Link
                         href={`/app/tareas/nueva?project=${conversation.projectId}&conversation=${conversation.id}&message=${message.id}`}
                         className="nexus-focus inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 text-[0.65rem] font-medium text-muted-foreground hover:border-primary/20 hover:text-primary"
@@ -1151,6 +1177,10 @@ export function ChatWorkspace({
                 >
                   <Paperclip /> Adjuntar
                 </Button>
+                <VoiceDictationButton
+                  disabled={isStreaming}
+                  onTranscript={(value) => setContent((current) => current ? `${current.trim()} ${value}` : value)}
+                />
                 <span className="hidden text-[0.62rem] text-muted-foreground/60 sm:inline">
                   Texto/código · 256 KB por archivo
                 </span>

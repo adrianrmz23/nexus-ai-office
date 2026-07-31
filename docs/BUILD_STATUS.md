@@ -14,13 +14,17 @@
 - Bloque 10: analítica operativa, costos, feedback, presupuestos y aprendizaje del recomendador.
 - Bloque 10.1: temas claro/oscuro/sistema y reparación del catálogo Gemini.
 - Bloque 11: repositorios, inventario versionado, contexto de archivos y propuestas aprobables.
+- Bloque 12: Kimi, DeepSeek, rate limiting, seguridad y preparación para producción.
+- Bloque 13: pendientes globales, Centro Hoy, voz, recordatorios, calendario y enfoque.
 
 ## Fase actual
 
-Fase 7 integrada — herramientas profesionales con contexto real de código.
+Fase 9 integrada — operación personal, briefing y voz sobre la plataforma profesional.
 
 ## Pendiente inmediato
 
+- Validar el Bloque 13 en navegadores de escritorio y Surface.
+- Evaluar proveedor de audio remoto para dictado uniforme entre navegadores.
 - Tool calling confirmado dentro del runtime con límites por ejecución.
 - Integración autorizada con GitHub para ramas, commits y pull requests.
 - Validación automática de propuestas mediante pruebas y linters aislados.

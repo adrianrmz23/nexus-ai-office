@@ -95,11 +95,12 @@ check(
 for (const migration of [
   "202607260012_repository_storage_rls_fix.sql",
   "202607260013_production_hardening.sql",
+  "202607260014_global_pendings_voice_today.sql",
 ]) {
   check(
     migration,
     existsSync(resolve(process.cwd(), "supabase", "migrations", migration)),
-    "Migración requerida por el Bloque 12.",
+    "Migración requerida por la versión actual de NEXUS.",
   );
 }
 

@@ -20,6 +20,7 @@ import {
   ChartNoAxesCombined,
   Coins,
   Star,
+  ClipboardCheck,
 } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
@@ -82,7 +83,7 @@ const managementModules = [
 ];
 
 export default async function AppDashboardPage() {
-  const { supabase, membership } = await requireCurrentWorkspace();
+  const { supabase, membership, user } = await requireCurrentWorkspace();
   const recentActivityCutoff = getIsoTimestampDaysAgo(30);
   const [
     technologyCountResult,
@@ -99,6 +100,7 @@ export default async function AppDashboardPage() {
     teamExecutionCountResult,
     completedHandoffCountResult,
     activeTaskCountResult,
+    activePendingCountResult,
     artifactCountResult,
     repositoryCountResult,
     repositoryFileCountResult,
@@ -174,6 +176,12 @@ export default async function AppDashboardPage() {
       .eq("workspace_id", membership.workspaceId)
       .in("status", ["backlog", "in_progress", "review"]),
     supabase
+      .from("global_pendings")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", membership.workspaceId)
+      .eq("owner_user_id", user.id)
+      .in("status", ["inbox", "pending", "in_progress", "waiting"]),
+    supabase
       .from("artifacts")
       .select("id", { count: "exact", head: true })
       .eq("workspace_id", membership.workspaceId)
@@ -221,6 +229,7 @@ export default async function AppDashboardPage() {
   const teamExecutionCount = teamExecutionCountResult.count ?? 0;
   const completedHandoffCount = completedHandoffCountResult.count ?? 0;
   const activeTaskCount = activeTaskCountResult.count ?? 0;
+  const activePendingCount = activePendingCountResult.count ?? 0;
   const artifactCount = artifactCountResult.count ?? 0;
   const repositoryCount = repositoryCountResult.count ?? 0;
   const repositoryFileCount = repositoryFileCountResult.count ?? 0;
@@ -245,8 +254,8 @@ export default async function AppDashboardPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             La base segura, los proyectos, agentes y modelos ya ejecutan conversaciones reales.
-            El modo equipo delega subtareas verificables y ahora cada resultado puede convertirse
-            en tareas, artefactos versionados, decisiones y soluciones con trazabilidad completa.
+            NEXUS también reúne pendientes globales, briefing diario y comandos de voz sin mezclar
+            compromisos personales con las tareas técnicas de cada proyecto.
           </p>
         </div>
 
@@ -306,6 +315,12 @@ export default async function AppDashboardPage() {
             value: activeTaskCount,
             detail: "Backlog, ejecución y revisión",
             icon: ListTodo,
+          },
+          {
+            label: "Pendientes",
+            value: activePendingCount,
+            detail: "Compromisos personales activos",
+            icon: ClipboardCheck,
           },
           {
             label: "Artefactos",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Accessibility, ArrowRight, MonitorCog, ShieldCheck } from "lucide-react";
+import { Accessibility, ArrowRight, Mic2, MonitorCog, ShieldCheck } from "lucide-react";
 
 import { ThemeSettings } from "@/components/theme/theme-settings";
 import { buttonVariants } from "@/components/ui/button";
@@ -36,6 +36,20 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      <section className="mt-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-start gap-3">
+            <Mic2 className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Voz y audio</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Configura dictado, lectura de respuestas, briefing hablado y notificaciones de pendientes.</p>
+            </div>
+          </div>
+          <Link href="/app/configuracion/voz" className={buttonVariants({ variant: "outline" })}>
+            Configurar voz <ArrowRight />
+          </Link>
+        </div>
+      </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

@@ -11,3 +11,8 @@ export function getIsoTimestampDaysAgo(days: number): string {
   timestamp.setUTCDate(timestamp.getUTCDate() - Math.trunc(days));
   return timestamp.toISOString();
 }
+
+/** Returns the current server clock value without accessing the clock inside a React component module. */
+export function getServerNow(): Date {
+  return new Date();
+}

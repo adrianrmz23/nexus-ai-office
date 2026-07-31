@@ -15,6 +15,8 @@ import {
   Settings2,
   ListTodo,
   PackageOpen,
+  CalendarCheck2,
+  ClipboardCheck,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -36,6 +38,20 @@ const navigation: NavigationItem[] = [
     icon: LayoutDashboard,
     enabled: true,
     exact: true,
+  },
+  {
+    label: "Hoy",
+    mobileLabel: "Hoy",
+    href: "/app/hoy",
+    icon: CalendarCheck2,
+    enabled: true,
+  },
+  {
+    label: "Pendientes",
+    mobileLabel: "Pendientes",
+    href: "/app/pendientes",
+    icon: ClipboardCheck,
+    enabled: true,
   },
   {
     label: "Proyectos",
@@ -172,7 +188,7 @@ export function MobileAppNavigation() {
   const mobileItems = navigation.filter(
     (item) =>
       item.enabled &&
-      ["/app", "/app/proyectos", "/app/tareas", "/app/conversaciones", "/app/agentes"].includes(item.href),
+      ["/app/hoy", "/app/pendientes", "/app/proyectos", "/app/tareas", "/app/conversaciones"].includes(item.href),
   );
 
   return (
